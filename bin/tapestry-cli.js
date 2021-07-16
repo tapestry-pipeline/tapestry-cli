@@ -11,7 +11,7 @@ const init = require('../src/commands/init');
 //   .description('Deploys Airbyte on system')
 //   .action(deploy)
 
-  program
+program
   .command('init')
   .alias('i')
   .description('Provisions project folder/file structure')
