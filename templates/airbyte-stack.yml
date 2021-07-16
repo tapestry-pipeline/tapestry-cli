@@ -1,0 +1,271 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  AirbyteIPAddress:
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref AirbyteEC2Instance
+      Tags:
+        - Key: tapestry
+          Value: user-access
+    Type: AWS::EC2::EIP
+  AirbyteEC2Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          commands:
+            setup:
+              command: !If [DefaultBucketIsBlank, '/usr/local/bin/ffsetup', !Sub '/usr/local/bin/ffsetup --bucket ${DefaultBucket}']
+    Properties:
+      IamInstanceProfile: !Ref RootInstanceProfile
+      ImageId: !FindInMap 
+        - AWSRegionArch2AMI
+        - !Ref 'AWS::Region'
+        - !FindInMap 
+          - AWSInstanceType2Arch
+          - !Ref InstanceType
+          - Arch
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      SecurityGroups:
+        - !Ref AirbyteSG
+      Tags:
+        - Key: Name
+          Value: AirbyteEC2Instance
+        - Key: tapestry
+          Value: user-access
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          # yum update -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource AirbyteEC2Instance --region ${AWS::Region}
+          yum install -y docker
+          service docker start
+          usermod -a -G docker ec2-user
+          wget https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m) -O /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+          mkdir airbyte && cd airbyte
+          wget https://raw.githubusercontent.com/airbytehq/airbyte/master/{.env,docker-compose.yaml}
+          docker-compose up -d
+  AirbyteBucket:
+    DeletionPolicy: Retain
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !If [DefaultBucketIsBlank, !Sub 'tapestry-${AirbyteEC2Instance}', !Ref DefaultBucket]
+      Tags:
+      - Key: tapestry
+        Value: user-access
+    DependsOn:
+      - AirbyteEC2Instance
+  AirbyteSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Airbyte Secruity Group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHLocation
+  RootInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref S3WritableRole
+  S3WritableRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+  RolePolicies:
+    Type: AWS::IAM::Policy
+    DependsOn:
+      - AirbyteEC2Instance
+    Properties:
+      PolicyName: AirbyteEC2InstancePolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - s3:CreateBucket
+              - s3:ListBucket
+              - s3:ListAllMyBuckets
+              - s3:GetBucketLocation
+            Resource: '*'
+      Roles:
+        - !Ref S3WritableRole
+  TapestryPipeline:
+    Type: AWS::IAM::Group
+    Properties:
+      Path: "/"
+      Policies:
+        - PolicyName: TapestryPipelineAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement: 
+              - Effect: Allow
+                Action:
+                  - ec2:*
+                  - s3:*
+                  - ecs:*
+                  - cloudformation:*
+                  - cloudwatch:*
+                  - logs:*
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    aws:ResourceTag/tapestry: "user-access"
+Parameters:
+  InstanceType:
+    Description: Airbyte instance type. You can use a t2.micro for testing, but m4.large is recommended for Production.
+    Type: String
+    Default: t2.medium
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - t2.xlarge
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge 
+    ConstraintDescription: must be a valid EC2 instance type. 
+  KeyPair:
+    Description: Make sure you have access to this EC2 key pair. Otherwise, create a new key pair before proceeding.
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: Existing EC2 KeyPair.
+  DefaultBucket:
+    Description: Set an S3 bucket
+    Type: String
+  SSHLocation:
+    Description: The IP address range that can be used to SSH to the EC2 instances
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 0.0.0.0/0
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+Mappings:
+  AWSInstanceType2Arch:
+    t2.micro:
+      Arch: HVM64
+    t2.small:
+      Arch: HVM64
+    t2.medium:
+      Arch: HVM64
+    t2.large:
+      Arch: HVM64
+  AWSInstanceType2NATArch:
+    t2.nano:
+      Arch: NATHVM64
+    t2.micro:
+      Arch: NATHVM64
+    t2.small:
+      Arch: NATHVM64
+    t2.medium:
+      Arch: NATHVM64
+    t2.large:
+      Arch: NATHVM64
+  AWSRegionArch2AMI:
+    af-south-1:
+      HVM64: ami-064cc455f8a1ef504
+      HVMG2: NOT_SUPPORTED
+    ap-east-1:
+      HVM64: ami-f85b1989
+      HVMG2: NOT_SUPPORTED
+    ap-northeast-1:
+      HVM64: ami-0b2c2a754d5b4da22
+      HVMG2: ami-09d0e0e099ecabba2
+    ap-northeast-2:
+      HVM64: ami-0493ab99920f410fc
+      HVMG2: NOT_SUPPORTED
+    ap-northeast-3:
+      HVM64: ami-01344f6f63a4decc1
+      HVMG2: NOT_SUPPORTED
+    ap-south-1:
+      HVM64: ami-03cfb5e1fb4fac428
+      HVMG2: ami-0244c1d42815af84a
+    ap-southeast-1:
+      HVM64: ami-0ba35dc9caf73d1c7
+      HVMG2: ami-0e46ce0d6a87dc979
+    ap-southeast-2:
+      HVM64: ami-0ae99b503e8694028
+      HVMG2: ami-0c0ab057a101d8ff2
+    ca-central-1:
+      HVM64: ami-0803e21a2ec22f953
+      HVMG2: NOT_SUPPORTED
+    cn-north-1:
+      HVM64: ami-07a3f215cc90c889c
+      HVMG2: NOT_SUPPORTED
+    cn-northwest-1:
+      HVM64: ami-0a3b3b10f714a0ff4
+      HVMG2: NOT_SUPPORTED
+    eu-central-1:
+      HVM64: ami-0474863011a7d1541
+      HVMG2: ami-0aa1822e3eb913a11
+    eu-north-1:
+      HVM64: ami-0de4b8910494dba0f
+      HVMG2: ami-32d55b4c
+    eu-south-1:
+      HVM64: ami-08427144fe9ebdef6
+      HVMG2: NOT_SUPPORTED
+    eu-west-1:
+      HVM64: ami-015232c01a82b847b
+      HVMG2: ami-0d5299b1c6112c3c7
+    eu-west-2:
+      HVM64: ami-0765d48d7e15beb93
+      HVMG2: NOT_SUPPORTED
+    eu-west-3:
+      HVM64: ami-0caf07637eda19d9c
+      HVMG2: NOT_SUPPORTED
+    me-south-1:
+      HVM64: ami-0744743d80915b497
+      HVMG2: NOT_SUPPORTED
+    sa-east-1:
+      HVM64: ami-0a52e8a6018e92bb0
+      HVMG2: NOT_SUPPORTED
+    us-east-1:
+      HVM64: ami-032930428bf1abbff
+      HVMG2: ami-0aeb704d503081ea6
+    us-east-2:
+      HVM64: ami-027cab9a7bf0155df
+      HVMG2: NOT_SUPPORTED
+    us-west-1:
+      HVM64: ami-088c153f74339f34c
+      HVMG2: ami-0a7fc72dc0e51aa77
+    us-west-2:
+      HVM64: ami-01fee56b22f308154
+      HVMG2: ami-0fe84a5b4563d8f27
+Conditions:
+  DefaultBucketIsBlank: !Equals ["", !Ref DefaultBucket]
+Outputs:
+  InstanceId:
+    Description: InstanceId of the newly created EC2 instance
+    Value: !Ref AirbyteEC2Instance
+  AZ:
+    Description: Availability Zone of the newly created EC2 instance
+    Value: !GetAtt 
+      - AirbyteEC2Instance
+      - AvailabilityZone
+  PublicDNS:
+    Description: Public DNSName of the newly created EC2 instance
+    Value: !GetAtt 
+      - AirbyteEC2Instance
+      - PublicDnsName
+  ElasticIP:
+    Value: !Ref AirbyteIPAddress
+    Description: Elastic IP address
