@@ -18,3 +18,4 @@ const init = require('../src/commands/init');
   .action(init)
 
 program.parse(process.argv);
+

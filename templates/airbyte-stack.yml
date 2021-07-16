@@ -269,3 +269,15 @@ Outputs:
   ElasticIP:
     Value: !Ref AirbyteIPAddress
     Description: Elastic IP address
+
+
+    # AirbyteELB:
+    #   Type: AWS::ElasticLoadBalancing::LoadBalancer
+    #   Properties:
+    #     AvailabilityZones:
+    #       Fn::GetAZs: !Ref "AWS::Region"
+    #     Listeners:
+    #       InstancePort: 80
+    #     Tags:
+    #       - Key: tapestry
+    #         Value: user-access

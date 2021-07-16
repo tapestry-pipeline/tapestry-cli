@@ -15,7 +15,13 @@
     "type": "git",
     "url": "git+https://github.com/tapestry-pipeline/tapestry-cli.git"
   },
-  "author": "Katherine Beck <katherine.murphy.beck@gmail.com>",
+  "author": "Tapestry",
+  "contributors": [
+    "Katherine Beck <katherine.murphy.beck@gmail.com>",
+    "Leah Garrison <lgarrison1023@gmail.com>",
+    "Rick Mole <ramole507@gmail.com>",
+    "Adam Peterson <adamp113@gmail.com>"
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/tapestry-pipeline/tapestry-cli/issues"
