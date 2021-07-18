@@ -15,13 +15,18 @@ Resources:
         config:
           commands:
             setup:
-              command: !If [DefaultBucketIsBlank, '/usr/local/bin/ffsetup', !Sub '/usr/local/bin/ffsetup --bucket ${DefaultBucket}']
+              command:
+                !If [
+                  DefaultBucketIsBlank,
+                  "/usr/local/bin/ffsetup",
+                  !Sub "/usr/local/bin/ffsetup --bucket ${DefaultBucket}",
+                ]
     Properties:
       IamInstanceProfile: !Ref RootInstanceProfile
-      ImageId: !FindInMap 
+      ImageId: !FindInMap
         - AWSRegionArch2AMI
-        - !Ref 'AWS::Region'
-        - !FindInMap 
+        - !Ref "AWS::Region"
+        - !FindInMap
           - AWSInstanceType2Arch
           - !Ref InstanceType
           - Arch
@@ -37,9 +42,9 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
-          yum update -y
-          # yum update -y aws-cfn-bootstrap
+          yum update -y aws-cfn-bootstrap
           /opt/aws/bin/cfn-init --stack ${AWS::StackName} --resource AirbyteEC2Instance --region ${AWS::Region}
+          yum update -y
           yum install -y docker
           service docker start
           usermod -a -G docker ec2-user
@@ -53,10 +58,15 @@ Resources:
     DeletionPolicy: Retain
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !If [DefaultBucketIsBlank, !Sub 'tapestry-${AirbyteEC2Instance}', !Ref DefaultBucket]
+      BucketName:
+        !If [
+          DefaultBucketIsBlank,
+          !Sub "tapestry-${AirbyteEC2Instance}",
+          !Ref DefaultBucket,
+        ]
       Tags:
-      - Key: tapestry
-        Value: user-access
+        - Key: tapestry
+          Value: user-access
     DependsOn:
       - AirbyteEC2Instance
   AirbyteSG:
@@ -98,14 +108,14 @@ Resources:
             Action:
               - s3:PutObject
               - s3:GetObject
-            Resource: '*'
+            Resource: "*"
           - Effect: Allow
             Action:
               - s3:CreateBucket
               - s3:ListBucket
               - s3:ListAllMyBuckets
               - s3:GetBucketLocation
-            Resource: '*'
+            Resource: "*"
       Roles:
         - !Ref S3WritableRole
   TapestryPipeline:
@@ -115,8 +125,8 @@ Resources:
       Policies:
         - PolicyName: TapestryPipelineAccess
           PolicyDocument:
-            Version: '2012-10-17'
-            Statement: 
+            Version: "2012-10-17"
+            Statement:
               - Effect: Allow
                 Action:
                   - ec2:*
@@ -142,8 +152,8 @@ Parameters:
       - t2.xlarge
       - m4.large
       - m4.xlarge
-      - m4.2xlarge 
-    ConstraintDescription: must be a valid EC2 instance type. 
+      - m4.2xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
   KeyPair:
     Description: Make sure you have access to this EC2 key pair. Otherwise, create a new key pair before proceeding.
     Type: AWS::EC2::KeyPair::KeyName
@@ -154,8 +164,8 @@ Parameters:
   SSHLocation:
     Description: The IP address range that can be used to SSH to the EC2 instances
     Type: String
-    MinLength: '9'
-    MaxLength: '18'
+    MinLength: "9"
+    MaxLength: "18"
     Default: 0.0.0.0/0
     AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
@@ -258,26 +268,44 @@ Outputs:
     Value: !Ref AirbyteEC2Instance
   AZ:
     Description: Availability Zone of the newly created EC2 instance
-    Value: !GetAtt 
+    Value: !GetAtt
       - AirbyteEC2Instance
       - AvailabilityZone
   PublicDNS:
     Description: Public DNSName of the newly created EC2 instance
-    Value: !GetAtt 
+    Value: !GetAtt
       - AirbyteEC2Instance
       - PublicDnsName
   ElasticIP:
     Value: !Ref AirbyteIPAddress
     Description: Elastic IP address
 
-
-    # AirbyteELB:
-    #   Type: AWS::ElasticLoadBalancing::LoadBalancer
-    #   Properties:
-    #     AvailabilityZones:
-    #       Fn::GetAZs: !Ref "AWS::Region"
-    #     Listeners:
-    #       InstancePort: 80
-    #     Tags:
-    #       - Key: tapestry
-    #         Value: user-access
+  #   AirbyteELB:
+  #   Type: AWS::ElasticLoadBalancing::LoadBalancer
+  #   Properties:
+  #     AvailabilityZones: !GetAZs ""
+  #     CrossZone: "true"
+  #     Listeners:
+  #       - LoadBalancerPort: "80"
+  #         InstancePort: "80"
+  #         Protocol: HTTP
+  #     HealthCheck:
+  #       Target: HTTP:80/
+  #       HealthyThreshold: "3"
+  #       UnhealthyThreshold: "5"
+  #       Interval: "30"
+  #       Timeout: "5"
+  #     ConnectionDrainingPolicy:
+  #       Enabled: "true"
+  #       Timeout: "300"
+  #     SecurityGroups:
+  #       - !Ref AirbyteELBSG
+  # AirbyteELBSG:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties:
+  #     GroupDescription: Airbyte ELB Security Group
+  #     SecurityGroupIngress:
+  #       - IpProtocol: tcp
+  #         FromPort: 80
+  #         ToPort: 80
+  #         CidrIp: 0.0.0.0/0

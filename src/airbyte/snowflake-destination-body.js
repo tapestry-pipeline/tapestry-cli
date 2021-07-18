@@ -19,12 +19,8 @@ export let body = {
     "host": "DLA27293.us-east-1.snowflakecomputing.com"
   },
   "workspaceId": "5ae6b09b-fdec-41af-aaf7-7d94cfc33ef6",
-  "name": "Snowflake test 2 "
+  "name": "Snowflake API Test"
  }
 
 
 //  localhost:8000/api/v1/destinations/check_connection
-
-export let destinationIdBody = {
-  "destinationId": "4f28af43-438a-425d-bffd-4d9b2c3af372"
-}
