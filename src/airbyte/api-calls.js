@@ -1,7 +1,7 @@
-import axios from "axios";
-
-import {body as zoomBody } from "./zoom-source-body.js"
-import {body as destinationBody} from "./snowflake-destination-body.js";
+// import axios from "axios";
+const axios = require('axios');
+// import {body as zoomBody } from "./zoom-source-body.js"
+// import {body as destinationBody} from "./snowflake-destination-body.js";
 // console.log(body)
 
 /// create a source
@@ -201,3 +201,6 @@ setupAirbyte(domainName, [zoomBody], destinationBody);
   // }
 
 
+module.exports = {
+  setupAirbyte
+}
