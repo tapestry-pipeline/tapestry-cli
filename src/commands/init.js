@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const { execSync } = require('child_process');
 const { setupAirbyte } = require('../airbyte/api-calls.js');
+const { buildSnowflakeDestination } = require('../airbyte/snowflake-destination-body.js');
 
 const validateInput = async (input) => {
    if (input === '') {
@@ -21,12 +22,23 @@ const gatherInfo = async () => {
   console.log('Please provide the following details:')
   await inquirer
     .prompt(questions)
-    .then(answers => {
+    .then(async answers => {
       execSync(`aws ssm put-parameter --name "/project-name" --value "${answers.projectName}" --type String --overwrite`);
       execSync(`aws ssm put-parameter --name "/snowflake/acct-hostname" --value "${answers.snowAcctHost}" --type SecureString --overwrite`);
       execSync(`aws ssm put-parameter --name "/snowflake/acct-username" --value "${answers.snowAcctUser}" --type SecureString --overwrite`);
       execSync(`aws ssm put-parameter --name "/snowflake/acct-pass" --value "${answers.snowAcctPass}" --type SecureString --overwrite`);
       execSync(`aws ssm put-parameter --name "/snowflake/ab-pass" --value "${answers.snowAbPass}" --type SecureString --overwrite`);
+    
+      const s3Obj = {
+        "method": "S3 Staging",
+        "s3_bucket_name":  "test-airbyte-bkt",
+        "s3_bucket_region": "us-east-1",
+        "access_key_id": "AKIAVNPHB36FE4Z6VTW4",
+        "secret_access_key":  "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"
+      }
+
+      const destinationObj = buildSnowflakeDestination(answers.snowAbPass, answers.snowAcctHost, s3Obj, "5ae6b09b-fdec-41af-aaf7-7d94cfc33ef6");
+      await setupAirbyte('http://localhost:8000', [], destinationObj);
     })
     .catch(error => console.log(error));
 }
@@ -75,9 +87,9 @@ const airbyteInfo = async () => {
 //   // await provisionFolders();
 // };
 
-module.exports = () => {
-  // await gatherInfo();
-  console.log(setupAirbyte);
+module.exports = async () => {
+  await gatherInfo();
+  console.log('done!');
   // await airbyteInfo();
   // await provisionFolders();
 }
