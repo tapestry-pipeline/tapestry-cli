@@ -4,7 +4,7 @@ Resources:
     Properties:
       Domain: vpc
       InstanceId: !Ref AirbyteEC2Instance
-      Tags:
+      Tags: 
         - Key: tapestry
           Value: user-access
     Type: AWS::EC2::EIP
@@ -33,7 +33,7 @@ Resources:
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyPair
       SecurityGroups:
-        - !Ref AirbyteSG
+        - !Ref AirbyteEC2SG
       Tags:
         - Key: Name
           Value: AirbyteEC2Instance
@@ -69,15 +69,19 @@ Resources:
           Value: user-access
     DependsOn:
       - AirbyteEC2Instance
-  AirbyteSG:
+  AirbyteEC2SG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Airbyte Secruity Group
+      GroupDescription: Airbyte EC2 Security Group
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
           CidrIp: !Ref SSHLocation
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupName: AirbyteELBSG
   RootInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -139,6 +143,74 @@ Resources:
                 Condition:
                   StringEquals:
                     aws:ResourceTag/tapestry: "user-access"
+  AirbyteEC2TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 15
+      HealthyThresholdCount: 5
+      Matcher:
+        HttpCode: "200"
+      Name: EC2TargetGroup
+      Port: 80
+      Protocol: HTTP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: "20"
+      Targets:
+        - Id:
+            Ref: AirbyteEC2Instance
+          Port: 8000
+      UnhealthyThresholdCount: 3
+      VpcId: !GetAtt AirbyteEC2SG.VpcId
+  AirbyteELBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Airbyte ELB Security Group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+  AirbyteELB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      # AvailabilityZones: !GetAZs ""
+      # CrossZone: "true"
+      # Listeners:
+      #   - LoadBalancerPort: "80"
+      #     InstancePort: "80"
+      #     Protocol: HTTP
+      # HealthCheck:
+      #   Target: HTTP:80/
+      #   HealthyThreshold: "3"
+      #   UnhealthyThreshold: "5"
+      #   Interval: "30"
+      #   Timeout: "5"
+      # ConnectionDrainingPolicy:
+      #   Enabled: "true"
+      #   Timeout: "300"
+      SecurityGroups:
+        - !GetAtt AirbyteELBSG.GroupId
+      Tags: 
+        - Key: tapestry
+          Value: user-access
+  AirbyteELBListener:
+      Type: AWS::ElasticLoadBalancingV2::Listener
+      Properties: 
+        # AlpnPolicy: 
+        #   - String
+        # Certificates: 
+        #   - Certificate
+        DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref AirbyteEC2TargetGroup
+        LoadBalancerArn: !Ref AirbyteELB
+        Port: 80
+        Protocol: HTTP
+        # SslPolicy: String
+ 
 Parameters:
   InstanceType:
     Description: Airbyte instance type. You can use a t2.micro for testing, but m4.large is recommended for Production.
@@ -280,32 +352,4 @@ Outputs:
     Value: !Ref AirbyteIPAddress
     Description: Elastic IP address
 
-  #   AirbyteELB:
-  #   Type: AWS::ElasticLoadBalancing::LoadBalancer
-  #   Properties:
-  #     AvailabilityZones: !GetAZs ""
-  #     CrossZone: "true"
-  #     Listeners:
-  #       - LoadBalancerPort: "80"
-  #         InstancePort: "80"
-  #         Protocol: HTTP
-  #     HealthCheck:
-  #       Target: HTTP:80/
-  #       HealthyThreshold: "3"
-  #       UnhealthyThreshold: "5"
-  #       Interval: "30"
-  #       Timeout: "5"
-  #     ConnectionDrainingPolicy:
-  #       Enabled: "true"
-  #       Timeout: "300"
-  #     SecurityGroups:
-  #       - !Ref AirbyteELBSG
-  # AirbyteELBSG:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Properties:
-  #     GroupDescription: Airbyte ELB Security Group
-  #     SecurityGroupIngress:
-  #       - IpProtocol: tcp
-  #         FromPort: 80
-  #         ToPort: 80
-  #         CidrIp: 0.0.0.0/0
+

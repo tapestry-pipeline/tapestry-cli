@@ -1,26 +1,35 @@
 const { execSync } = require('child_process');
 
-const KEY_PAIR = 'tapestry-key-pair-17';
+const randomizeKeyPairName = () => {
+  const characters =  "abcdefghijklmnopqrstuvwxyz1234567890";
+  const length = 5; 
+  let randomString = ""; 
+  for (let i=1; i <= length; i++) {
+    let index = Math.floor(Math.random() * characters.length);
+    randomString += characters[index];
+  }
 
-const provisionResources = () => {
-  execSync(`aws ec2 create-key-pair --key-name ${KEY_PAIR} --query "KeyMaterial" --output text > ${KEY_PAIR}.pem`);
-  process.env.SSH_KEY = `./config/${KEY_PAIR}.pem`;
+  return "tapestry-key-pair-" + randomString;
+}
 
-  execSync(`chmod 400 ${process.env.SSH_KEY}`);
+const provisionResources = (keyPairName) => {
+  execSync(`aws ec2 create-key-pair --key-name ${keyPairName} --query "KeyMaterial" --output text > ${keyPairName}.pem`);
+  execSync(`aws ssm put-parameter --name "/airbyte/key-pair" --value "$(cat ${keyPairName}.pem)" --type SecureString --overwrite`);
+  execSync(`rm "${keyPairName}.pem"`);
   console.log('EC2 Key Pair created \u2714');
-
-  execSync(`aws cloudformation create-stack --template-body file://../../templates/airbyte-stack.yaml --stack-name tap-ab-test --parameters ParameterKey=KeyPair,ParameterValue=${KEY_PAIR} ParameterKey=DefaultBucket,ParameterValue=test-tags-b --capabilities CAPABILITY_NAMED_IAM`);
+  // address where to store template files; executing from different directories error
+  execSync(`aws cloudformation create-stack --template-body file://templates/airbyte-stack.yml --stack-name tapestry-${keyPairName} --parameters ParameterKey=KeyPair,ParameterValue=${keyPairName} ParameterKey=DefaultBucket,ParameterValue=${keyPairName}-bucket --capabilities CAPABILITY_NAMED_IAM`);
   console.log('Stack created \u2714');
 }
 
-const connectInstance = () => {
+const connectInstance = (keyPairName) => {
   console.log('Waiting for Airbyte EC2 instance to run...');
 
-  execSync(`aws ec2 wait instance-running --filters "Name=key-name, Values=${KEY_PAIR}"`);
+  execSync(`aws ec2 wait instance-running --filters "Name=key-name, Values=${keyPairName}"`);
 
   // process.env.INSTANCE_IP = execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${KEY_PAIR}" --query "Reservations[*].Instances[*].PublicIpAddress" --output text`);
   
-  process.env.INSTANCE_ID = execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${KEY_PAIR}" --query "Reservations[*].Instances[*].[InstanceId]" --output text`);
+  process.env.INSTANCE_ID = execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${keyPairName}" --query "Reservations[*].Instances[*].[InstanceId]" --output text`);
   console.log('Airbyte EC2 instance now running \u2714');
 
   console.log('Waiting for "okay" status from Airbyte EC2 instance...');
@@ -30,11 +39,13 @@ const connectInstance = () => {
 }
 
 module.exports = () => {
+  const keyPairName = randomizeKeyPairName();
+
   console.log('Provisioning cloud resources...');
-  provisionResources();
+  provisionResources(keyPairName);
 
   console.log('Connecting Airbyte to EC2 instance...')
-  connectInstance();
+  connectInstance(keyPairName);
 
   console.log('Deployment finished!');
 };
