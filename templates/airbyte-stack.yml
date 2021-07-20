@@ -79,9 +79,10 @@ Resources:
           ToPort: 22
           CidrIp: !Ref SSHLocation
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          SourceSecurityGroupName: AirbyteELBSG
+          FromPort: 1
+          ToPort: 65535
+          SourceSecurityGroupId: !GetAtt AirbyteLBSG.GroupId
+    DependsOn: AirbyteLBSG
   RootInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -158,58 +159,41 @@ Resources:
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: "20"
-      Targets:
-        - Id:
-            Ref: AirbyteEC2Instance
-          Port: 8000
+      # Targets:
+      #   - Id:
+      #       Ref: AirbyteEC2Instance
+      #     Port: 8000
       UnhealthyThresholdCount: 3
       VpcId: !GetAtt AirbyteEC2SG.VpcId
-  AirbyteELBSG:
+  AirbyteLBSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Airbyte ELB Security Group
+      GroupDescription: Airbyte LB Security Group
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-  AirbyteELB:
+  AirbyteLB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      # AvailabilityZones: !GetAZs ""
-      # CrossZone: "true"
-      # Listeners:
-      #   - LoadBalancerPort: "80"
-      #     InstancePort: "80"
-      #     Protocol: HTTP
-      # HealthCheck:
-      #   Target: HTTP:80/
-      #   HealthyThreshold: "3"
-      #   UnhealthyThreshold: "5"
-      #   Interval: "30"
-      #   Timeout: "5"
-      # ConnectionDrainingPolicy:
-      #   Enabled: "true"
-      #   Timeout: "300"
+      Subnets:
+          - !Ref VpcSubnetA
+          - !Ref VpcSubnetB
       SecurityGroups:
-        - !GetAtt AirbyteELBSG.GroupId
+        - !GetAtt AirbyteLBSG.GroupId
       Tags: 
         - Key: tapestry
           Value: user-access
-  AirbyteELBListener:
+  AirbyteLBListener:
       Type: AWS::ElasticLoadBalancingV2::Listener
       Properties: 
-        # AlpnPolicy: 
-        #   - String
-        # Certificates: 
-        #   - Certificate
         DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref AirbyteEC2TargetGroup
-        LoadBalancerArn: !Ref AirbyteELB
+        LoadBalancerArn: !Ref AirbyteLB
         Port: 80
         Protocol: HTTP
-        # SslPolicy: String
  
 Parameters:
   InstanceType:
@@ -241,6 +225,18 @@ Parameters:
     Default: 0.0.0.0/0
     AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+  VpcId:
+    Type: String
+    Description: VPC for Cluster
+    Default: vpc-814f29ea
+  VpcSubnetA:
+    Type: String
+    Description: First subnet for the Airbyte service
+    Default: subnet-90de55f6
+  VpcSubnetB:
+    Type: String
+    Description: Second subnet for the Airbyte service
+    Default: subnet-87298ddd
 Mappings:
   AWSInstanceType2Arch:
     t2.micro:
@@ -344,10 +340,10 @@ Outputs:
       - AirbyteEC2Instance
       - AvailabilityZone
   PublicDNS:
-    Description: Public DNSName of the newly created EC2 instance
+    Description: Public DNSName of the newly created Load Balancer
     Value: !GetAtt
-      - AirbyteEC2Instance
-      - PublicDnsName
+      - AirbyteLB
+      - DNSName
   ElasticIP:
     Value: !Ref AirbyteIPAddress
     Description: Elastic IP address

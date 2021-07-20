@@ -10,9 +10,10 @@ const validateInput = async (input) => {
 
 const questions = [
   { type: 'input', name: 'projectName', message: 'Project name:', default: 'tapestry-project'},
-  { type: 'input', name: 'snowflakeAcct', message: 'Snowflake Account: (i.e. "dla27293.us-east-1")', validate: validateInput},
-  { type: 'input', name: 'snowflakeUsername', message: 'Snowflake Username:', validate: validateInput },
-  { type: 'password', name: 'snowflakePass', message: 'Snowflake Password:', validate: validateInput, mask: '*' },
+  { type: 'input', name: 'snowflakeAcct', message: 'Snowflake Account Host: (i.e. "dla27293.us-east-1")', validate: validateInput},
+  { type: 'input', name: 'snowflakeUsername', message: 'Snowflake Account Username:', validate: validateInput },
+  { type: 'password', name: 'snowflakePass', message: 'Snowflake Account Password:', validate: validateInput, mask: '*' },
+  { type: 'password', name: 'snowflakePass', message: 'Snowflake Airbyte Database/Warehouse Password:', validate: validateInput, mask: '*' },
 ];
 
 const gatherInfo = async () => {

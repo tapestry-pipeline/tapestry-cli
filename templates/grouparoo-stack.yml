@@ -5,7 +5,7 @@ Description: Creates an ECS Cluster for running a development instance of Groupa
 Parameters:
   VpcId:
     Type: String
-    Description: VPC for Cluster creation
+    Description: VPC for Cluster
     Default: vpc-814f29ea
   VpcSubnetA:
     Type: String
@@ -145,3 +145,19 @@ Resources:
         ToPort: 3000
         CidrIp: 0.0.0.0/0
       VpcId: !Ref VpcId
+
+
+#  AirbyteEC2SG:
+#     Type: AWS::EC2::SecurityGroup
+#     Properties:
+#       GroupDescription: Airbyte EC2 Security Group
+#       SecurityGroupIngress:
+#         # - IpProtocol: tcp
+#         #   FromPort: 22
+#         #   ToPort: 22
+#         #   CidrIp: !Ref SSHLocation
+#         - IpProtocol: tcp
+#           FromPort: 80
+#           ToPort: 80
+#           SourceSecurityGroupID: !GetAtt AirbyteELBSG.GroupId
+#     DependsOn: AirbyteELBSG
