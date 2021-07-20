@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 const { program } = require('commander');
-// import { Command } from 'commander/esm.mjs';
-// const program = new Command();
 
+// command imports
 const deploy = require('../src/commands/deploy');
 const init = require('../src/commands/init');
+const kickstart = require('../src/commands/kickstart');
 
 program
   .command('deploy')
@@ -14,9 +14,15 @@ program
   .action(deploy)
 
 program
+  .command('kickstart')
+  .alias('k')
+  .description('Sets up third-party SaaS services in pipeline for immediate use')
+  .action(kickstart)
+
+program
   .command('init')
   .alias('i')
-  .description('Provisions project folder/file structure')
+  .description('Gather preliminary information')
   .action(init)
 
 program.parse(process.argv);

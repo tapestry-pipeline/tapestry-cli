@@ -1,14 +1,17 @@
-// import axios from "axios";
 const axios = require("axios");
-const zoomBody = require( "./zoom-source-body.js").body;
-const destinationBody = require("./snowflake-destination-body.js").body;
+const axiosRetry = require('axios-retry');
 
-// import {body as zoomBody } from "./zoom-source-body.js"
-// import {body as destinationBody} from "./snowflake-destination-body.js";
-// console.log(body)
-
-/// create a source
-const domainName = "http://localhost:8000/";
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: (retryCount) => {
+    console.log(`retry attempt: ${retryCount}`);
+    return retryCount * 2000; // time interval between retries
+  },
+  retryCondition: (error) => {
+    console.log('Workspace not found. Retrying request...')
+    return error.response.status === 404;
+  }
+});
 
 async function getWorkspaceId(domainName) {
   return await axios
@@ -18,7 +21,7 @@ async function getWorkspaceId(domainName) {
       console.log(data.workspaceId);
       return data.workspaceId;
     })
-    .catch((error) => console.log(err));
+    .catch((error) => console.log(error));
 }
 
 async function createSource(domainName, body) {
@@ -30,8 +33,6 @@ async function createSource(domainName, body) {
     })
     .catch((error) => console.log(err));
 }
-
-// // console.log(createSource(domainName, body));
 
 async function createDestination(domainName, body) {
   return await axios
@@ -71,9 +72,6 @@ async function checkDestinationConnection(domainName, id) {
       console.log(error);
     });
 }
-
-// // checkSourceConnection(domainName, {"sourceId": "2714f42d-82e4-4036-a4f"});
-// // checkDestinationConnection(domainName, {"destinationId": "4f28af43-438a-425d-bffd-4d9b2c3af372"});
 
 async function createOperation(domainName) {
   let body = {
@@ -143,8 +141,6 @@ async function getSourceSchema(domainName) {
     });
 }
 
-// createConnection(domainName, bodyProperties)
-
 async function createConnectionObject(sourceId, destinationId, operationId, schema, schedule = null) {
   return {
     name: "Connection 1",
@@ -168,44 +164,34 @@ async function createConnectionObject(sourceId, destinationId, operationId, sche
   };
 }
 
-async function setupAirbyte(domainName, sourceConfigList, destinationConfigObject) {
-  const workspaceId = await getWorkspaceId(domainName);
+async function setupAirbyteDestination(domainName, destinationConfigObject) {
   const destinationId = await createDestination(domainName,destinationConfigObject);
   const destinationStatus = await checkDestinationConnection(domainName, destinationId);
   if (destinationStatus !== "succeeded") {
     console.log("error, check snowflake config");
     return;
   }
-
-  // const operationId = await createOperation(domainName, "test operation name");
-
-  // for (const source of sourceConfigList) {
-  //   const sourceId = await createSource(domainName, source);
-  //   const sourceStatus = await checkSourceConnection(domainName, sourceId);
-  //   if (sourceStatus !== 'succeeded') {
-  //     console.log('error, check source config');
-  //     return;
-  //   }
-
-  //   const schema = await getSourceSchema(domainName);
-  //   const connectionObject = await createConnectionObject(sourceId, destinationId, operationId, schema)
-  //   await createConnection(domainName, connectionObject);
-  // }
 }
 
-// setupAirbyte(domainName, [zoomBody], destinationBody);
+async function setupAirbyteSources(domainName, sourceConfigList, destinationId) {
+  const operationId = await createOperation(domainName, "test operation name");
 
-// let bodyProperties = {
-//   "sourceId": "6cfe7dfb-295d-4c24-95f9-89256ba0b309",
-//   "destinationId": "4f28af43-438a-425d-bffd-4d9b2c3af372",
-//   "operationIds": "cc6e7adc-361e-4c24-b328-6fdb34931b08",
-//   "schedule":  {
-//         "units": "30",
-//         "timeUnit": "minutes"
-//     }
-// }
+  for (const source of sourceConfigList) {
+    const sourceId = await createSource(domainName, source);
+    const sourceStatus = await checkSourceConnection(domainName, sourceId);
+    if (sourceStatus !== 'succeeded') {
+      console.log('error, check source config');
+      return;
+    }
+
+    const schema = await getSourceSchema(domainName);
+    const connectionObject = await createConnectionObject(sourceId, destinationId, operationId, schema)
+    await createConnection(domainName, connectionObject);
+  }
+}
 
 module.exports = {
-  setupAirbyte,
+  setupAirbyteDestination,
+  setupAirbyteSources,
   getWorkspaceId
 };

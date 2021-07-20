@@ -1,8 +1,9 @@
 const { execSync } = require('child_process');
-const { setupAirbyte, getWorkspaceId} = require('../airbyte/api-calls.js');
+const { setupAirbyteDestination, getWorkspaceId } = require('../airbyte/api-calls.js');
 const { buildSnowflakeDestination } = require('../airbyte/snowflake-destination-body.js');
+const { buildZoomSource } = require('../airbyte/zoom-source-body.js');
+
 const inquirer = require('inquirer');
-//const publicDns = 'http://tapes-airby-1dhd9evhi93c5-512384796.us-east-2.elb.amazonaws.com';
 
 const randomizeKeyPairName = () => {
   const characters =  "abcdefghijklmnopqrstuvwxyz1234567890";
@@ -30,7 +31,7 @@ const provisionResources = (keyPairName) => {
 
   const [VpcId] = JSON.parse(execSync(`aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[*].VpcId'`).toString()); 
   const [subnetA, subnetB] = JSON.parse(execSync(`aws ec2 describe-subnets --filters "Name=vpc-id,Values=${VpcId}" --query 'Subnets[*].SubnetId'`).toString()); 
-
+  
   // address where to store template files; executing from different directories error
   execSync(`aws cloudformation create-stack --template-body file://templates/airbyte-stack.yml --stack-name tapestry-${keyPairName} --parameters ParameterKey=KeyPair,ParameterValue=${keyPairName} ParameterKey=DefaultBucket,ParameterValue=${keyPairName}-bucket ParameterKey=VpcId,ParameterValue=${VpcId} ParameterKey=VpcSubnetA,ParameterValue=${subnetA} ParameterKey=VpcSubnetB,ParameterValue=${subnetB} --capabilities CAPABILITY_NAMED_IAM`);
   console.log('Stack created \u2714');
@@ -57,19 +58,20 @@ const registerTargetGroup = (keyPairName) => {
   const InstanceId = getInstanceId(keyPairName);
 
   execSync(`aws elbv2 register-targets --target-group-arn ${TargetGroupArn} --targets Id=${InstanceId},Port=8000`)
-}
 
+  console.log('Waiting for "healthy" status from Target Group...')
+  execSync(`aws elbv2 wait target-in-service --target-group-arn ${TargetGroupArn} --targets Id=${InstanceId},Port=8000`);
+}
 
 const getPublicDNS = (keyPairName) => {
   const [ publicDNS ] = JSON.parse(execSync(`aws cloudformation describe-stacks --stack-name tapestry-${keyPairName} --query "Stacks[0].Outputs[?OutputKey=='PublicDNS'].OutputValue"`));
-  return publicDNS; 
+  return `http://${publicDNS}`;
 }
 
 const launchPublicDNS = (publicDNS) => {
   console.log(publicDNS);
-  execSync(`open http://${publicDNS}`); //TODO - just for Mac
+  execSync(`open ${publicDNS}`); //TODO - just for Mac
 }
-
 
 const getS3BucketRegion = async (instanceId) => {
   return JSON.parse(execSync(`aws ec2 describe-instances --instance-ids ${instanceId} --query "Reservations[0].Instances[0].Placement.AvailabilityZone"`).toString()).slice(0,-1);
@@ -105,7 +107,7 @@ const connectSnowflakeToAirbyte = async (keyPairName, publicDNS) => {
         const snowAcctHost = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-hostname" --with-decryption').toString()).Parameter.Value;
 
         const destinationObj = buildSnowflakeDestination(snowAbPass, snowAcctHost, s3Info, workspaceId);
-        await setupAirbyte(publicDns, [], destinationObj);
+        await setupAirbyteDestination(publicDNS, destinationObj);
       }
     })
 }

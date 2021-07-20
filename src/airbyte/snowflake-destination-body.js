@@ -1,5 +1,3 @@
-// localhost:8000/api/v1/destinations/create 
-
 const buildSnowflakeDestination = (password, hostname, s3Info, workspaceId) => {
   return {
     "destinationDefinitionId": "424892c4-daac-4491-b35d-c6688ba547ba",
@@ -18,7 +16,8 @@ const buildSnowflakeDestination = (password, hostname, s3Info, workspaceId) => {
   }
 }
 
-// let body = {
+// snowflake body info template:
+// {
 //   "destinationDefinitionId": "424892c4-daac-4491-b35d-c6688ba547ba",
 //   "connectionConfiguration": {
 //     "loading_method": {
@@ -44,5 +43,3 @@ const buildSnowflakeDestination = (password, hostname, s3Info, workspaceId) => {
  module.exports = {
   buildSnowflakeDestination
  }
-
-//  localhost:8000/api/v1/destinations/check_connection

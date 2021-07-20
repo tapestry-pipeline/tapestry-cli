@@ -4,7 +4,7 @@ Resources:
     Properties:
       Domain: vpc
       InstanceId: !Ref AirbyteEC2Instance
-      Tags: 
+      Tags:
         - Key: tapestry
           Value: user-access
     Type: AWS::EC2::EIP
@@ -32,8 +32,9 @@ Resources:
           - Arch
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyPair
-      SecurityGroups:
-        - !Ref AirbyteEC2SG
+      SecurityGroupIds:
+        - !GetAtt AirbyteEC2SG.GroupId
+      SubnetId: !Ref VpcSubnetA
       Tags:
         - Key: Name
           Value: AirbyteEC2Instance
@@ -164,7 +165,7 @@ Resources:
       #       Ref: AirbyteEC2Instance
       #     Port: 8000
       UnhealthyThresholdCount: 3
-      VpcId: !GetAtt AirbyteEC2SG.VpcId
+      VpcId: !Ref VpcId
   AirbyteLBSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -178,23 +179,23 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Subnets:
-          - !Ref VpcSubnetA
-          - !Ref VpcSubnetB
+        - !Ref VpcSubnetA
+        - !Ref VpcSubnetB
       SecurityGroups:
         - !GetAtt AirbyteLBSG.GroupId
-      Tags: 
+      Tags:
         - Key: tapestry
           Value: user-access
   AirbyteLBListener:
-      Type: AWS::ElasticLoadBalancingV2::Listener
-      Properties: 
-        DefaultActions:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref AirbyteEC2TargetGroup
-        LoadBalancerArn: !Ref AirbyteLB
-        Port: 80
-        Protocol: HTTP
- 
+      LoadBalancerArn: !Ref AirbyteLB
+      Port: 80
+      Protocol: HTTP
+
 Parameters:
   InstanceType:
     Description: Airbyte instance type. You can use a t2.micro for testing, but m4.large is recommended for Production.
@@ -228,15 +229,12 @@ Parameters:
   VpcId:
     Type: String
     Description: VPC for Cluster
-    Default: vpc-814f29ea
   VpcSubnetA:
     Type: String
     Description: First subnet for the Airbyte service
-    Default: subnet-90de55f6
   VpcSubnetB:
     Type: String
     Description: Second subnet for the Airbyte service
-    Default: subnet-87298ddd
 Mappings:
   AWSInstanceType2Arch:
     t2.micro:
@@ -347,5 +345,3 @@ Outputs:
   ElasticIP:
     Value: !Ref AirbyteIPAddress
     Description: Elastic IP address
-
-

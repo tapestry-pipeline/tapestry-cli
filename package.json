@@ -29,11 +29,9 @@
   "homepage": "https://github.com/tapestry-pipeline/tapestry-cli#readme",
   "dependencies": {
     "axios": "^0.21.1",
+    "axios-retry": "^3.1.9",
     "child_process": "^1.0.2",
     "commander": "^8.0.0",
     "inquirer": "^8.1.2"
   }
-
 }
-
-

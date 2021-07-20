@@ -51,30 +51,6 @@ const gatherInfo = async () => {
 //   "timeUnit": "minutes"
 // },
 
-const syncChoices = [
-  'manual', 'Every 30 min', 'Every hour', 
-];
-// 'Every 3 hours', 'Every 6 hours', 'Every 8 hours',
-//   'Every 12 hours', 'Every 24 hours'Every 15 min' , 'Every 5 Min', ''Every 2 hours',
-const zoomQuestions = [
-  { type: 'list', name: 'syncOption', message: 'Sync frequency:', choices: syncChoices },
-  { type: 'input', name: 'jwtToken', message: 'JWT Token:', validate: validateInput },
-];
-
-const salesForceQuestions = [
-  { type: 'input', name: '', message: '' },
-];
-
-const airbyteInfo = async () => {
-  console.log('Please provide the following details:')
-  await inquirer
-    .prompt(zoomQuestions)
-    .then(answers => {
-      
-    })
-    .catch(error => console.log(error));
-}
-
 // const provisionFolders = async () => {
 //   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
 //   console.log(projectName);
@@ -84,18 +60,8 @@ const airbyteInfo = async () => {
 //   $ for i in "${arr[@]}"; do  mkdir -p "${i%/*}" && touch "$i"; done
 // }
 
-// module.exports = async () => {
-//   // await gatherInfo();
-//   await airbyteInfo();
-//   // await provisionFolders();
-// };
-
 module.exports = async () => {
   await gatherInfo();;
   // await airbyteInfo();
   // await provisionFolders();
 }
-
-// const password = JSON.parse(execSync(`aws ssm get-parameter --name "/snowflake/pass" --with-decryption`).toString()).Parameter.Value;
-
-// let [instanceId] = aws ec2 describe-instances --filters "Name=key-name, Values=$KEY_PAIR" --query "Reservations[*].Instances[*].Placement
