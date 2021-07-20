@@ -31,17 +31,6 @@ const gatherInfo = async () => {
       execSync(`aws ssm put-parameter --name "/snowflake/acct-username" --value "${answers.snowAcctUser}" --type SecureString --overwrite`);
       execSync(`aws ssm put-parameter --name "/snowflake/acct-pass" --value "${answers.snowAcctPass}" --type SecureString --overwrite`);
       execSync(`aws ssm put-parameter --name "/snowflake/ab-pass" --value "${answers.snowAbPass}" --type SecureString --overwrite`);
-    
-      // const s3Obj = {
-      //   "method": "S3 Staging",
-      //   "s3_bucket_name":  "test-airbyte-bkt",
-      //   "s3_bucket_region": "us-east-1",
-      //   "access_key_id": "AKIAVNPHB36FE4Z6VTW4",
-      //   "secret_access_key":  "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"
-      // }
-
-      // const destinationObj = buildSnowflakeDestination(answers.snowAbPass, answers.snowAcctHost, s3Obj, "5ae6b09b-fdec-41af-aaf7-7d94cfc33ef6");
-      // await setupAirbyte('http://localhost:8000', [], destinationObj);
     })
     .catch(error => console.log(error));
 }

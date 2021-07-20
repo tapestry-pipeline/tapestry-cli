@@ -1,5 +1,7 @@
 const axios = require("axios");
 const axiosRetry = require('axios-retry');
+const { execSync } = require('child_process');
+const SALESFORCE_DEFINITION_ID = "2470e835-feaf-4db6-96f3-70fd645acc77"; 
 
 axiosRetry(axios, {
   retries: 3,
@@ -13,13 +15,13 @@ axiosRetry(axios, {
   }
 });
 
-async function getWorkspaceId(domainName) {
+async function storeWorkspaceId(domainName) {
   return await axios
     .post(`${domainName}/api/v1/workspaces/get_by_slug`, { slug: "default" })
     .then((response) => {
       let data = response.data;
       console.log(data.workspaceId);
-      return data.workspaceId;
+      execSync(`aws ssm put-parameter --name "/airbyte/workspace-id" --value "${data.workspaceId}" --type String --overwrite`);
     })
     .catch((error) => console.log(error));
 }
@@ -31,7 +33,7 @@ async function createSource(domainName, body) {
       let data = response.data;
       return data.sourceId;
     })
-    .catch((error) => console.log(err));
+    .catch((error) => console.log(error));
 }
 
 async function createDestination(domainName, body) {
@@ -122,31 +124,35 @@ const filterSchemas = (streamArray, streamName) => {
   });
 };
 
-async function getSourceSchema(domainName) {
+async function getSourceSchema(domainName, sourceDefinitionId, connectionConfiguration) {
   let obj = {
-    sourceDefinitionId: "aea2fd0d-377d-465e-86c0-4fdc4f688e51",
-    connectionConfiguration: {
-      jwt: "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6InFra0pPREdYU1BPS0U2NGQ2YWNKZWciLCJleHAiOjE2MzUwNDc5NDAsImlhdCI6MTYyNjM3NDg1MX0.Kzr3uc5c0bIP7hv6Hh-DA6BrfCWeKgxZiaV1SdiYf14",
-    },
+    sourceDefinitionId: sourceDefinitionId,
+    connectionConfiguration: connectionConfiguration
   };
+
+  let schemaName; 
+  if (sourceDefinitionId === SALESFORCE_DEFINITION_ID) {
+    schemaName = "contacts";
+  } else {
+    schemaName = "users";
+  }
 
   return await axios
     .post(`${domainName}/api/v1/scheduler/sources/discover_schema`, obj)
     .then((response) => {
       let data = response.data;
-      return filterSchemas(data.catalog.streams, "users");
+      return filterSchemas(data.catalog.streams, schemaName);
     })
     .catch((error) => {
       console.log(error);
     });
 }
 
-async function createConnectionObject(sourceId, destinationId, operationId, schema, schedule = null) {
+async function createConnectionObject(sourceId, destinationId, operationId, schema, schedule = null) {  
   return {
-    name: "Connection 1",
     namespaceDefinition: "source",
     namespaceFormat: "${SOURCE_NAMESPACE}",
-    prefix: "SF_API_",
+    prefix: "TAP_CONN_",
     sourceId: sourceId,
     destinationId: destinationId,
     operationIds: [operationId],
@@ -165,7 +171,7 @@ async function createConnectionObject(sourceId, destinationId, operationId, sche
 }
 
 async function setupAirbyteDestination(domainName, destinationConfigObject) {
-  const destinationId = await createDestination(domainName,destinationConfigObject);
+  const destinationId = await createDestination(domainName, destinationConfigObject);
   const destinationStatus = await checkDestinationConnection(domainName, destinationId);
   if (destinationStatus !== "succeeded") {
     console.log("error, check snowflake config");
@@ -174,7 +180,7 @@ async function setupAirbyteDestination(domainName, destinationConfigObject) {
 }
 
 async function setupAirbyteSources(domainName, sourceConfigList, destinationId) {
-  const operationId = await createOperation(domainName, "test operation name");
+  const operationId = await createOperation(domainName, "normalization");
 
   for (const source of sourceConfigList) {
     const sourceId = await createSource(domainName, source);
@@ -184,7 +190,7 @@ async function setupAirbyteSources(domainName, sourceConfigList, destinationId) 
       return;
     }
 
-    const schema = await getSourceSchema(domainName);
+    const schema = await getSourceSchema(domainName, source.sourceDefinitionId, source.connectionConfiguration);
     const connectionObject = await createConnectionObject(sourceId, destinationId, operationId, schema)
     await createConnection(domainName, connectionObject);
   }
@@ -193,5 +199,5 @@ async function setupAirbyteSources(domainName, sourceConfigList, destinationId) 
 module.exports = {
   setupAirbyteDestination,
   setupAirbyteSources,
-  getWorkspaceId
+  storeWorkspaceId
 };

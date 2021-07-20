@@ -1,5 +1,5 @@
 const { execSync } = require('child_process');
-const { setupAirbyteSources, getWorkspaceId } = require('../airbyte/api-calls.js');
+const { setupAirbyteSources } = require('../airbyte/api-calls.js');
 const { buildZoomSource } = require('../airbyte/zoom-source-body.js');
 const { buildSalesforceSource } = require('../airbyte/salesforce-source-body.js');
 
@@ -13,9 +13,9 @@ const validateInput = async (input) => {
 }
 
 const sourcesSetup = async () => {
-  // grab publicDNS
-  const publicDNS = 'http://tapes-airby-1a5s5wxcanrwn-2058759617.us-east-2.elb.amazonaws.com/';
-
+  const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
+  const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
+  
   const syncChoices = [
     'manual', 'Every 30 min', 'Every hour',
   ];
@@ -39,9 +39,6 @@ const sourcesSetup = async () => {
   await inquirer
     .prompt(questions)
     .then(async answers => {
-      // grab workspaceId
-      const workspaceId = await getWorkspaceId(publicDNS);
-      
       const zoomBody = buildZoomSource(answers.jwtToken, workspaceId);
       const salesforceSourceBody = buildSalesforceSource(
         answers.clientId,
@@ -51,8 +48,8 @@ const sourcesSetup = async () => {
         workspaceId
       );
 
-      await setupAirbyteSources(publicDNS, [zoomBody, salesforceSourceBody], 'accadcf6-426c-4e71-b568-e5b65a2ffa28');
-    })
+      await setupAirbyteSources(publicDNS, [zoomBody, salesforceSourceBody], '98769a3f-85d7-44aa-b3dd-7fd2e2add821');
+    });
 }
 
 module.exports = async () => {

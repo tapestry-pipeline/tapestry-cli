@@ -1,7 +1,6 @@
 const { execSync } = require('child_process');
-const { setupAirbyteDestination, getWorkspaceId } = require('../airbyte/api-calls.js');
+const { setupAirbyteDestination, storeWorkspaceId } = require('../airbyte/api-calls.js');
 const { buildSnowflakeDestination } = require('../airbyte/snowflake-destination-body.js');
-const { buildZoomSource } = require('../airbyte/zoom-source-body.js');
 
 const inquirer = require('inquirer');
 
@@ -63,9 +62,9 @@ const registerTargetGroup = (keyPairName) => {
   execSync(`aws elbv2 wait target-in-service --target-group-arn ${TargetGroupArn} --targets Id=${InstanceId},Port=8000`);
 }
 
-const getPublicDNS = (keyPairName) => {
+const storePublicDNS = (keyPairName) => {
   const [ publicDNS ] = JSON.parse(execSync(`aws cloudformation describe-stacks --stack-name tapestry-${keyPairName} --query "Stacks[0].Outputs[?OutputKey=='PublicDNS'].OutputValue"`));
-  return `http://${publicDNS}`;
+  execSync(`aws ssm put-parameter --name "/airbyte/public-dns" --value "http://${publicDNS}" --type String --overwrite`);
 }
 
 const launchPublicDNS = (publicDNS) => {
@@ -87,7 +86,8 @@ const connectSnowflakeToAirbyte = async (keyPairName, publicDNS) => {
 
       if (confirmAbLogin) {
         // get workspace id
-        const workspaceId = await getWorkspaceId(publicDNS);
+        await storeWorkspaceId(publicDNS);
+        const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
         console.log(workspaceId)
         const instanceId = await getInstanceId(keyPairName);
         console.log(instanceId)
@@ -125,7 +125,8 @@ module.exports = async () => {
   registerTargetGroup(keyPairName);
   
   console.log(`Launching Airbyte UI to enter login information...`)
-  const publicDNS = getPublicDNS(keyPairName);
+  storePublicDNS(keyPairName);
+  const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
   launchPublicDNS(publicDNS);
 
   await connectSnowflakeToAirbyte(keyPairName, publicDNS);
