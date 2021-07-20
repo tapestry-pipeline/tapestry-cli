@@ -1,4 +1,8 @@
 const { execSync } = require('child_process');
+const { setupAirbyte, getWorkspaceId} = require('../airbyte/api-calls.js');
+const { buildSnowflakeDestination } = require('../airbyte/snowflake-destination-body.js');
+const inquirer = require('inquirer');
+//const publicDns = 'http://tapes-airby-1dhd9evhi93c5-512384796.us-east-2.elb.amazonaws.com';
 
 const randomizeKeyPairName = () => {
   const characters =  "abcdefghijklmnopqrstuvwxyz1234567890";
@@ -13,6 +17,7 @@ const randomizeKeyPairName = () => {
 }
 
 const getInstanceId = (keyPairName) => {
+  console.log(keyPairName)
   const [ [ InstanceId ] ] = JSON.parse(execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${keyPairName}" --query "Reservations[*].Instances[*].InstanceId"`).toString());
   return InstanceId; 
 }
@@ -38,7 +43,7 @@ const connectInstance = (keyPairName) => {
 
   // process.env.INSTANCE_IP = execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${KEY_PAIR}" --query "Reservations[*].Instances[*].PublicIpAddress" --output text`);
   
-  const InstanceId = getInstanceId(keyPairName); 
+  const InstanceId = getInstanceId(keyPairName);
   console.log('Airbyte EC2 instance now running \u2714');
 
   console.log('Waiting for "okay" status from Airbyte EC2 instance...');
@@ -54,12 +59,58 @@ const registerTargetGroup = (keyPairName) => {
   execSync(`aws elbv2 register-targets --target-group-arn ${TargetGroupArn} --targets Id=${InstanceId},Port=8000`)
 }
 
-const launchPublicDNS = (keyPairName) => {
-  const [ publicDNS ] = JSON.parse(execSync(`aws cloudformation describe-stacks --stack-name tapestry-${keyPairName} --query "Stacks[0].Outputs[?OutputKey=='PublicDNS'].OutputValue"`)); 
-  execSync(`open http://${publicDNS}`); 
+
+const getPublicDNS = (keyPairName) => {
+  const [ publicDNS ] = JSON.parse(execSync(`aws cloudformation describe-stacks --stack-name tapestry-${keyPairName} --query "Stacks[0].Outputs[?OutputKey=='PublicDNS'].OutputValue"`));
+  return publicDNS; 
 }
 
-module.exports = () => {
+const launchPublicDNS = (publicDNS) => {
+  console.log(publicDNS);
+  execSync(`open http://${publicDNS}`); //TODO - just for Mac
+}
+
+
+const getS3BucketRegion = async (instanceId) => {
+  return JSON.parse(execSync(`aws ec2 describe-instances --instance-ids ${instanceId} --query "Reservations[0].Instances[0].Placement.AvailabilityZone"`).toString()).slice(0,-1);
+}
+
+const connectSnowflakeToAirbyte = async (keyPairName, publicDNS) => {
+  const loginConfirmation = [{type: 'confirm', name: 'confirmAbLogin', message: 'Please enter your email and click "continue" to create your workspace. Confirm when you are ready.'}];
+
+  await inquirer
+    .prompt(loginConfirmation)
+    .then(async ({ confirmAbLogin }) => {
+      console.log(confirmAbLogin)
+
+      if (confirmAbLogin) {
+        // get workspace id
+        const workspaceId = await getWorkspaceId(publicDNS);
+        console.log(workspaceId)
+        const instanceId = await getInstanceId(keyPairName);
+        console.log(instanceId)
+        const s3BucketRegion = await getS3BucketRegion(instanceId);
+        console.log(s3BucketRegion)
+        
+        const s3Info = {
+          "method": "S3 Staging",
+          "s3_bucket_name":  `${keyPairName}-bucket`,
+          "s3_bucket_region": s3BucketRegion,
+          "access_key_id": "AKIAVWSKU6ZYMDQU7JWK",
+          "secret_access_key" :  "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"
+        }
+        
+        // need to grab snowAbPass and snowAcctHost from param store /snowflake/ab-pass
+        const snowAbPass = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/ab-pass" --with-decryption').toString()).Parameter.Value;
+        const snowAcctHost = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-hostname" --with-decryption').toString()).Parameter.Value;
+
+        const destinationObj = buildSnowflakeDestination(snowAbPass, snowAcctHost, s3Info, workspaceId);
+        await setupAirbyte(publicDns, [], destinationObj);
+      }
+    })
+}
+
+module.exports = async () => {
   const keyPairName = randomizeKeyPairName();
 
   console.log('Provisioning cloud resources...');
@@ -72,7 +123,10 @@ module.exports = () => {
   registerTargetGroup(keyPairName);
   
   console.log(`Launching Airbyte UI to enter login information...`)
-  launchPublicDNS(keyPairName);
+  const publicDNS = getPublicDNS(keyPairName);
+  launchPublicDNS(publicDNS);
+
+  await connectSnowflakeToAirbyte(keyPairName, publicDNS);
   
   console.log('Deployment finished!');
 };

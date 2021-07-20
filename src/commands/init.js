@@ -1,5 +1,8 @@
 const inquirer = require('inquirer');
 const { execSync } = require('child_process');
+const { setupAirbyte, getWorkspaceId } = require('../airbyte/api-calls.js');
+const { buildSnowflakeDestination } = require('../airbyte/snowflake-destination-body.js');
+
 
 const validateInput = async (input) => {
    if (input === '') {
@@ -10,38 +13,89 @@ const validateInput = async (input) => {
 
 const questions = [
   { type: 'input', name: 'projectName', message: 'Project name:', default: 'tapestry-project'},
-  { type: 'input', name: 'snowflakeAcct', message: 'Snowflake Account Host: (i.e. "dla27293.us-east-1")', validate: validateInput},
-  { type: 'input', name: 'snowflakeUsername', message: 'Snowflake Account Username:', validate: validateInput },
-  { type: 'password', name: 'snowflakePass', message: 'Snowflake Account Password:', validate: validateInput, mask: '*' },
-  { type: 'password', name: 'snowflakePass', message: 'Snowflake Airbyte Database/Warehouse Password:', validate: validateInput, mask: '*' },
+  { type: 'input', name: 'snowAcctHost', message: 'Snowflake Account Host: (i.e. "dla27293.us-east-1")', validate: validateInput},
+  { type: 'input', name: 'snowAcctUser', message: 'Snowflake Account Username:', validate: validateInput },
+  { type: 'password', name: 'snowAcctPass', message: 'Snowflake Account Password:', validate: validateInput, mask: '*' },
+  { type: 'password', name: 'snowAbPass', message: 'Snowflake Airbyte Database/Warehouse Password:', validate: validateInput, mask: '*' }, 
 ];
+
+
 
 const gatherInfo = async () => {
   console.log('Please provide the following details:')
   await inquirer
     .prompt(questions)
-    .then(answers => {
+    .then(async answers => {
       execSync(`aws ssm put-parameter --name "/project-name" --value "${answers.projectName}" --type String --overwrite`);
-      execSync(`aws ssm put-parameter --name "/snowflake/acct-name" --value "${answers.snowflakeAcct}" --type SecureString --overwrite`);
-      execSync(`aws ssm put-parameter --name "/snowflake/usrname" --value "${answers.snowflakeUsername}" --type SecureString --overwrite`);
-      execSync(`aws ssm put-parameter --name "/snowflake/pass" --value "${answers.snowflakePass}" --type SecureString --overwrite`);
+      execSync(`aws ssm put-parameter --name "/snowflake/acct-hostname" --value "${answers.snowAcctHost}" --type SecureString --overwrite`);
+      execSync(`aws ssm put-parameter --name "/snowflake/acct-username" --value "${answers.snowAcctUser}" --type SecureString --overwrite`);
+      execSync(`aws ssm put-parameter --name "/snowflake/acct-pass" --value "${answers.snowAcctPass}" --type SecureString --overwrite`);
+      execSync(`aws ssm put-parameter --name "/snowflake/ab-pass" --value "${answers.snowAbPass}" --type SecureString --overwrite`);
+    
+      // const s3Obj = {
+      //   "method": "S3 Staging",
+      //   "s3_bucket_name":  "test-airbyte-bkt",
+      //   "s3_bucket_region": "us-east-1",
+      //   "access_key_id": "AKIAVNPHB36FE4Z6VTW4",
+      //   "secret_access_key":  "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"
+      // }
+
+      // const destinationObj = buildSnowflakeDestination(answers.snowAbPass, answers.snowAcctHost, s3Obj, "5ae6b09b-fdec-41af-aaf7-7d94cfc33ef6");
+      // await setupAirbyte('http://localhost:8000', [], destinationObj);
     })
     .catch(error => console.log(error));
 }
 
-const provisionFolders = async () => {
-  const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
-  console.log(projectName);
-  // execSync(``);
+// "schedule": {
+//   "units": "30",
+//   "timeUnit": "minutes"
+// },
 
-  // $ arr=( mydir/{colors/{basic/{red,blue,green},blended/{yellow,orange,pink}},shape/{circle,square,cube},animals/{mammals/{platipus,bat,dog},reptiles/{snakes,crocodile,lizard}}} )
-  // $ for i in "${arr[@]}"; do  mkdir -p "${i%/*}" && touch "$i"; done
+const syncChoices = [
+  'manual', 'Every 30 min', 'Every hour', 
+];
+// 'Every 3 hours', 'Every 6 hours', 'Every 8 hours',
+//   'Every 12 hours', 'Every 24 hours'Every 15 min' , 'Every 5 Min', ''Every 2 hours',
+const zoomQuestions = [
+  { type: 'list', name: 'syncOption', message: 'Sync frequency:', choices: syncChoices },
+  { type: 'input', name: 'jwtToken', message: 'JWT Token:', validate: validateInput },
+];
+
+const salesForceQuestions = [
+  { type: 'input', name: '', message: '' },
+];
+
+const airbyteInfo = async () => {
+  console.log('Please provide the following details:')
+  await inquirer
+    .prompt(zoomQuestions)
+    .then(answers => {
+      
+    })
+    .catch(error => console.log(error));
 }
 
+// const provisionFolders = async () => {
+//   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+//   console.log(projectName);
+//   execSync(``);
+
+//   $ arr=( mydir/{colors/{basic/{red,blue,green},blended/{yellow,orange,pink}},shape/{circle,square,cube},animals/{mammals/{platipus,bat,dog},reptiles/{snakes,crocodile,lizard}}} )
+//   $ for i in "${arr[@]}"; do  mkdir -p "${i%/*}" && touch "$i"; done
+// }
+
+// module.exports = async () => {
+//   // await gatherInfo();
+//   await airbyteInfo();
+//   // await provisionFolders();
+// };
+
 module.exports = async () => {
-  await gatherInfo();
+  await gatherInfo();;
+  // await airbyteInfo();
   // await provisionFolders();
-};
+}
 
 // const password = JSON.parse(execSync(`aws ssm get-parameter --name "/snowflake/pass" --with-decryption`).toString()).Parameter.Value;
 
+// let [instanceId] = aws ec2 describe-instances --filters "Name=key-name, Values=$KEY_PAIR" --query "Reservations[*].Instances[*].Placement
