@@ -1,0 +1,29 @@
+{
+  "author": "Your Name <email@example.com>",
+  "name": "my-tapestry-project",
+  "description": "A Grouparoo Deployment",
+  "version": "0.0.1",
+  "license": "MPL-2.0",
+  "private": true,
+  "engines": {
+    "node": ">=12.0.0 <16.0.0"
+  },
+  "dependencies": {
+    "@grouparoo/core": "0.4.3",
+    "@grouparoo/mailchimp": "0.4.3",
+    "@grouparoo/postgres": "0.4.3",
+    "@grouparoo/snowflake": "0.4.3",
+    "@grouparoo/ui-community": "0.4.3",
+    "sqlite3": "^5.0.2"
+  },
+  "scripts": {
+    "start": "cd node_modules/@grouparoo/core && ./bin/start"
+  },
+  "grouparoo": {
+    "plugins": [
+      "@grouparoo/mailchimp",
+      "@grouparoo/postgres",
+      "@grouparoo/snowflake"
+    ]
+  }
+}
