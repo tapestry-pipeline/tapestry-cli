@@ -31,6 +31,7 @@ const gatherInfo = async () => {
     .catch(error => console.log(error));
 }
 
+
 // "schedule": {
 //   "units": "30",
 //   "timeUnit": "minutes"
@@ -44,6 +45,8 @@ const gatherInfo = async () => {
 //   $ arr=( mydir/{colors/{basic/{red,blue,green},blended/{yellow,orange,pink}},shape/{circle,square,cube},animals/{mammals/{platipus,bat,dog},reptiles/{snakes,crocodile,lizard}}} )
 //   $ for i in "${arr[@]}"; do  mkdir -p "${i%/*}" && touch "$i"; done
 // }
+
+// gatherInfo();
 
 module.exports = async () => {
   await gatherInfo();;
