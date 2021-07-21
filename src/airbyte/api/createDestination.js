@@ -5,7 +5,6 @@ async function createDestination(domainName, body) {
     .post(`${domainName}/api/v1/destinations/create`, body)
     .then((response) => {
       let data = response.data;
-      console.log(data.destinationId);
       return data.destinationId;
     })
     .catch((error) => {

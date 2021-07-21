@@ -2,6 +2,7 @@ const { execSync } = require('child_process');
 const { storeWorkspaceId } = require('../airbyte/api/storeWorkspaceId.js');
 const { setupAirbyteDestination } = require('../airbyte/api/airbyteSetup.js');
 const { buildSnowflakeDestination } = require('../airbyte/configObjects/buildSnowflakeDestination.js');
+const { createAirbyteWarehouse } = require('../airbyte/warehouseSetup/createAirbyteWarehouse.js');
 
 const inquirer = require('inquirer');
 
@@ -18,9 +19,8 @@ const randomizeKeyPairName = () => {
 }
 
 const getInstanceId = (keyPairName) => {
-  console.log(keyPairName)
-  const [ [ InstanceId ] ] = JSON.parse(execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${keyPairName}" --query "Reservations[*].Instances[*].InstanceId"`).toString());
-  return InstanceId; 
+  const [ [ instanceId ] ] = JSON.parse(execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${keyPairName}" --query "Reservations[*].Instances[*].InstanceId"`).toString());
+  return instanceId;
 }
 
 const provisionResources = (keyPairName) => {
@@ -32,7 +32,7 @@ const provisionResources = (keyPairName) => {
   const [VpcId] = JSON.parse(execSync(`aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[*].VpcId'`).toString()); 
   const [subnetA, subnetB] = JSON.parse(execSync(`aws ec2 describe-subnets --filters "Name=vpc-id,Values=${VpcId}" --query 'Subnets[*].SubnetId'`).toString()); 
   
-  // address where to store template files; executing from different directories error
+  // TODO- address where to store template files; executing from different directories error
   execSync(`aws cloudformation create-stack --template-body file://templates/airbyte-stack.yml --stack-name tapestry-${keyPairName} --parameters ParameterKey=KeyPair,ParameterValue=${keyPairName} ParameterKey=DefaultBucket,ParameterValue=${keyPairName}-bucket ParameterKey=VpcId,ParameterValue=${VpcId} ParameterKey=VpcSubnetA,ParameterValue=${subnetA} ParameterKey=VpcSubnetB,ParameterValue=${subnetB} --capabilities CAPABILITY_NAMED_IAM`);
   console.log('Stack created \u2714');
 }
@@ -44,23 +44,22 @@ const connectInstance = (keyPairName) => {
 
   // process.env.INSTANCE_IP = execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${KEY_PAIR}" --query "Reservations[*].Instances[*].PublicIpAddress" --output text`);
   
-  const InstanceId = getInstanceId(keyPairName);
-  console.log('Airbyte EC2 instance now running \u2714');
-
+  const instanceId = getInstanceId(keyPairName);
   console.log('Waiting for "okay" status from Airbyte EC2 instance...');
-  execSync(`aws ec2 wait instance-status-ok --instance-ids ${InstanceId}`);
+  execSync(`aws ec2 wait instance-status-ok --instance-ids ${instanceId}`);
   
+  console.log('Airbyte EC2 instance now running \u2714');
   // execSync(`ssh -i ${process.env.SSH_KEY} -L 8000:localhost:8000 -N -f ec2-user@${process.env.INSTANCE_IP}`, { stdio: 'inherit' });
 }
 
 const registerTargetGroup = (keyPairName) => {
   const [TargetGroupArn] = JSON.parse(execSync(`aws elbv2 describe-target-groups --names EC2TargetGroup --query 'TargetGroups[*].TargetGroupArn'`).toString()); 
-  const InstanceId = getInstanceId(keyPairName);
+  const instanceId = getInstanceId(keyPairName);
 
-  execSync(`aws elbv2 register-targets --target-group-arn ${TargetGroupArn} --targets Id=${InstanceId},Port=8000`)
+  execSync(`aws elbv2 register-targets --target-group-arn ${TargetGroupArn} --targets Id=${instanceId},Port=8000`)
 
   console.log('Waiting for "healthy" status from Target Group...')
-  execSync(`aws elbv2 wait target-in-service --target-group-arn ${TargetGroupArn} --targets Id=${InstanceId},Port=8000`);
+  execSync(`aws elbv2 wait target-in-service --target-group-arn ${TargetGroupArn} --targets Id=${instanceId},Port=8000`);
 }
 
 const storePublicDNS = (keyPairName) => {
@@ -78,33 +77,33 @@ const getS3BucketRegion = async (instanceId) => {
 }
 
 const connectSnowflakeToAirbyte = async (keyPairName, publicDNS) => {
-  const loginConfirmation = [{type: 'confirm', name: 'confirmAbLogin', message: 'Please enter your email and click "continue" to create your workspace. Confirm when you are ready.'}];
+  const loginConfirmation = [{type: 'confirm', name: 'confirmAbLogin', message: 'Please enter your email in the browser and click "continue" to create your workspace. \n Be sure to "skip onboarding step"! Confirm when you are ready.'}];
 
   await inquirer
     .prompt(loginConfirmation)
     .then(async ({ confirmAbLogin }) => {
-      console.log(confirmAbLogin)
+      
 
       if (confirmAbLogin) {
-        // get workspace id
+        console.log("Thanks for creating your workspace!");
+        
+        console.log("Setting up Snowflake as a destination in Airbyte...");
         await storeWorkspaceId(publicDNS);
         const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
-        console.log(workspaceId)
         const instanceId = await getInstanceId(keyPairName);
-        console.log(instanceId)
         const s3BucketRegion = await getS3BucketRegion(instanceId);
-        console.log(s3BucketRegion)
         
+        const accessKeyId = execSync('aws configure get aws_access_key_id').toString().trim();
+        const secretAccessKey = execSync('aws configure get aws_secret_access_key').toString().trim();
+
         const s3Info = {
           "method": "S3 Staging",
           "s3_bucket_name":  `${keyPairName}-bucket`,
           "s3_bucket_region": s3BucketRegion,
-          "access_key_id": "AKIA6JVSRH45DWTARHWG",
-          "secret_access_key" :  "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"
+          "access_key_id": accessKeyId,
+          "secret_access_key" :  secretAccessKey
         }
-        // TODO - ask for user access key id/secret access key, store in SSM parameter store
         
-        // need to grab snowAbPass and snowAcctHost from param store /snowflake/ab-pass
         const snowAbPass = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/ab-pass" --with-decryption').toString()).Parameter.Value;
         const snowAcctHost = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-hostname" --with-decryption').toString()).Parameter.Value;
 
@@ -115,18 +114,20 @@ const connectSnowflakeToAirbyte = async (keyPairName, publicDNS) => {
 }
 
 module.exports = async () => {
+  await createAirbyteWarehouse();
+
   const keyPairName = randomizeKeyPairName();
 
-  console.log('Provisioning cloud resources...');
+  console.log('Provisioning AWS cloud resources...');
   provisionResources(keyPairName);
 
-  console.log('Connecting Airbyte to EC2 instance...')
+  console.log('Installing Airbyte on EC2 instance...')
   connectInstance(keyPairName);
 
   console.log('Registering target group...')
   registerTargetGroup(keyPairName);
   
-  console.log(`Launching Airbyte UI to enter login information...`)
+  console.log('Launching Airbyte UI to enter login information...')
   storePublicDNS(keyPairName);
   const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
   launchPublicDNS(publicDNS);
@@ -136,4 +137,5 @@ module.exports = async () => {
   console.log('Deployment finished!');
 };
 
+// TODO - file too long, refactor 
 // TODO - review what to log to console during deployment 

@@ -14,16 +14,20 @@ async function getSourceSchema(domainName, sourceDefinitionId, connectionConfigu
   };
 
   let schemaName; 
+  // let message; 
+  
   if (sourceDefinitionId === SALESFORCE_DEFINITION_ID) {
     schemaName = "Contact";
+    // message = "Salesforce";
   } else {
     schemaName = "users";
+    // message = "Zoom";
   }
 
   return await axios
     .post(`${domainName}/api/v1/scheduler/sources/discover_schema`, obj)
     .then((response) => {
-      let data = response.data;
+      let data = response.data; 
       console.log(data);
       return filterSchemas(data.catalog.streams, schemaName);
     })

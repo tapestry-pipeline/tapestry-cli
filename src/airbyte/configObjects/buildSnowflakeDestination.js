@@ -9,7 +9,7 @@ const buildSnowflakeDestination = (password, hostname, s3Info, workspaceId) => {
       "database": "AIRBYTE_DATABASE",
       "warehouse": "AIRBYTE_WAREHOUSE",
       "role": "AIRBYTE_ROLE",
-      "host": hostname
+      "host": `${hostname}.snowflakecomputing.com`
     },
     "workspaceId": workspaceId,
     "name": "Snowflake API Test"
