@@ -1,4 +1,3 @@
-
 const buildZoomSource = (jwt, workspaceId) => {
   return {
     "sourceDefinitionId": "aea2fd0d-377d-465e-86c0-4fdc4f688e51",  
@@ -6,9 +5,14 @@ const buildZoomSource = (jwt, workspaceId) => {
         "jwt" : jwt
     },
     "workspaceId": workspaceId,
-    "name": "Zoom API Test2"
+    "name": "Zoom (Tapestry)"
   }
 }
+
+module.exports = {
+  buildZoomSource
+}
+
 
 // zoom body info template:
 // let body = { 
@@ -19,10 +23,3 @@ const buildZoomSource = (jwt, workspaceId) => {
 //   "workspaceId": "5ae6b09b-fdec-41af-aaf7-7d94cfc33ef6",
 //   "name": "Zoom API Test2"
 // }
-
-module.exports = {
-  buildZoomSource
-}
-
-
-

@@ -39,3 +39,5 @@ async function main() {
 }
 
 main(); 
+
+// TODO - include in deploy command? 

@@ -9,7 +9,7 @@ const buildSalesforceSource = (client_id, client_secret, refresh_token, start_da
       "api_type": "BULK"
     },
   "workspaceId": workspaceId,
-  "name": "Salesforce API Test"
+  "name": "Salesforce (Tapestry)"
   }
 }
 

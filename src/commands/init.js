@@ -1,8 +1,5 @@
 const inquirer = require('inquirer');
 const { execSync } = require('child_process');
-const { setupAirbyte, getWorkspaceId } = require('../airbyte/api-calls.js');
-const { buildSnowflakeDestination } = require('../airbyte/snowflake-destination-body.js');
-
 
 const validateInput = async (input) => {
    if (input === '') {
@@ -18,8 +15,6 @@ const questions = [
   { type: 'password', name: 'snowAcctPass', message: 'Snowflake Account Password:', validate: validateInput, mask: '*' },
   { type: 'password', name: 'snowAbPass', message: 'Snowflake Airbyte Database/Warehouse Password:', validate: validateInput, mask: '*' }, 
 ];
-
-
 
 const gatherInfo = async () => {
   console.log('Please provide the following details:')

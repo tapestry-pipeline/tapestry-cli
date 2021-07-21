@@ -1,6 +1,7 @@
 const { execSync } = require('child_process');
-const { setupAirbyteDestination, storeWorkspaceId } = require('../airbyte/api-calls.js');
-const { buildSnowflakeDestination } = require('../airbyte/snowflake-destination-body.js');
+const { storeWorkspaceId } = require('../airbyte/api/storeWorkspaceId.js');
+const { setupAirbyteDestination } = require('../airbyte/api/airbyteSetup.js');
+const { buildSnowflakeDestination } = require('../airbyte/configObjects/buildSnowflakeDestination.js');
 
 const inquirer = require('inquirer');
 
@@ -98,9 +99,10 @@ const connectSnowflakeToAirbyte = async (keyPairName, publicDNS) => {
           "method": "S3 Staging",
           "s3_bucket_name":  `${keyPairName}-bucket`,
           "s3_bucket_region": s3BucketRegion,
-          "access_key_id": "AKIAVWSKU6ZYMDQU7JWK",
-          "secret_access_key" :  "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"
+          "access_key_id": "AKIA6JVSRH45DWTARHWG",
+          "secret_access_key" :  "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"
         }
+        // TODO - ask for user access key id/secret access key, store in SSM parameter store
         
         // need to grab snowAbPass and snowAcctHost from param store /snowflake/ab-pass
         const snowAbPass = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/ab-pass" --with-decryption').toString()).Parameter.Value;
@@ -133,3 +135,5 @@ module.exports = async () => {
   
   console.log('Deployment finished!');
 };
+
+// TODO - review what to log to console during deployment 
