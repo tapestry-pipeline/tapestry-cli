@@ -1,3 +1,6 @@
+const {snowflakeAppId} = require ('../../commands.js');
+const {snowflakeTableName, snowflakeSourceId} = require ('../../commands.js');
+
 exports.default = async function buildConfig() {
   return [
     /**
@@ -7,12 +10,12 @@ exports.default = async function buildConfig() {
      */
     {
       class: "source",
-      id: "all_users",
-      name: "all_users",
+      id: snowflakeSourceId,
+      name: snowflakeSourceId,
       type: "snowflake-table-import",
-      appId: "first_snowflake_app", // Set this value to the ID of the App this Source uses - e.g. `appId: "data_warehouse"`
+      appId: snowflakeAppId, // Set this value to the ID of the App this Source uses - e.g. `appId: "data_warehouse"`
       options: {
-        table: "EMP_BASIC", // Name of the table in your DB - e.g. `table: "users"`
+        table: snowflakeTableName, // Name of the table in your DB - e.g. `table: "users"`
       },
 
       /**
@@ -25,8 +28,9 @@ exports.default = async function buildConfig() {
        *
        *     mapping: { id: "user_id" }
        */
+      // left column (email) in snowflake
       mapping: {
-        EMAIL: "EMAIL",
+        EMAIL: "EMAIL",  // snowflake table column-name : Grouparoo Property ID
       },
     },
 
@@ -43,12 +47,12 @@ exports.default = async function buildConfig() {
       id: "all_users_schedule",
       name: "all_users_schedule",
       class: "schedule",
-      sourceId: "all_users", // The ID of the Source above
+      sourceId: snowflakeSourceId, // The ID of the Source above
       recurring: true, // should this Schedule regularly run?
       recurringFrequency: 1000 * 60 * 15, // 15 minutes, in ms
       options: {
         column: "START_DATE", // the column to check for new records in table which this Schedule's Source is using (e.g. column: 'updated_at')
-      },
+      }, // TODO - this will need to be updated with the right Column name from DBT
     },
   ];
 };

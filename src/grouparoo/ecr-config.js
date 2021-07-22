@@ -1,5 +1,5 @@
-
-const { execSync } = require('child_process');
+""
+const { execSync, exec } = require('child_process');
 
 const getRegion = () => {
   return execSync(`aws configure get region`).toString().trim();
@@ -17,21 +17,53 @@ const connectToECR= () => {
     execSync(`aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin "${accountId}.dkr.ecr.${region}.amazonaws.com"`, {stdio:'inherit'});
    
     // -t fantasticfour/grouparoo:latest
-    // BUILD
-    execSync(`docker image build ./my-tapestry-project`);
+
+    // switch context to run build command
+    // execSync(`sudo service docker start`)
+    execSync(`docker context use default`);
+    // // BUILD
+    execSync(`docker build -t grouparoo ./kickstart`, {stdio: 'inherit'});
     
-    // // CREATE REPO
+    // // // CREATE REPO
     execSync(`aws ecr create-repository \
     --repository-name grouparoo \
     --image-scanning-configuration scanOnPush=true \
-    --region ${region}`);
+    --region ${region}`, {stdio: 'inherit'});
+
 
     // // TAG
-    execSync(`docker tag grouparoo:latest ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`);
+    execSync(`docker tag grouparoo:latest ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`, {stdio: 'inherit'});
+  
+    
 
-    // // PUSH
-    execSync(`docker push ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`) 
+    console.log(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`);
+    execSync(`docker context create ecs myecscontext19`, {stdio: 'inherit'});
+    execSync(`docker context use myecscontext19`);
+    // const imageUrl = "kmbeck428/docker-grouparoo-test"
+    const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
+    execSync(`export URL=${imageUrl} && echo $URL && docker-compose up`, {stdio: 'inherit'} );
+
+    // 
 }
 connectToECR();
+
+  // console.log(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`);
+  // execSync(`docker context create ecs myecscontext13`, {stdio: 'inherit'});
+  // execSync(`docker context use myecscontext13`);
+  // // const imageUrl = "kmbeck428/docker-grouparoo-test"
+  // const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
+  // execSync(`export URL=${imageUrl} && echo $URL && docker compose up`, {stdio: 'inherit'} );
+  // execSync(`${URL}`, {stdio: 'inherit'});
+  // execSync(`docker compose up`);
+
+
+// --sk 
+// --skip-keypress
+
+
+
+
+// --from
+
 
 // let password = execSync(`aws ecr get-login-password --region ${region}`).toString();

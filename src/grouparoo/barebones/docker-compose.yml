@@ -41,6 +41,7 @@ services:
 
   grouparoo-worker:
     image: "${URL}"
+    #"${URL}"
     restart: always
     environment:
       REDIS_URL: redis://redis:6379/0
