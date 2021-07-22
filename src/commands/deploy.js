@@ -7,7 +7,7 @@ const { createAirbyteStack } = require('../aws/createAirbyteStack.js');
 const { connectInstance } = require('../aws/connectInstance.js');
 const { registerTargets } = require('../aws/registerTargets'); 
 const { storePublicDNS } = require('../aws/storePublicDNS.js');
-const { setupSnowflakeDestination } = require('../airbyte/setupConnections.js'); 
+const { setupSnowflakeDestination } = require('../airbyte/setupConnections/setupSnowflakeDestination.js'); 
 
 module.exports = async () => {
   await createAirbyteWarehouse();

@@ -1,5 +1,5 @@
 const { execSync } = require('child_process');
-const { setupAirbyteSources } = require('../airbyte/api/airbyteSetup.js');
+const { setupAirbyteSources } = require('../airbyte/setupConnections/airbyteSetup.js');
 const { buildZoomSource } = require('../airbyte/configObjects/buildZoomSource.js');
 const { buildSalesforceSource } = require('../airbyte/configObjects/buildSalesforceSource.js');
 
