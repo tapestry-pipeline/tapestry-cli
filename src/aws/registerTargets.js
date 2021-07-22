@@ -1,4 +1,5 @@
 const { execSync } = require('child_process');
+const { getInstanceId } = require('./getInstanceId.js')
 
 const registerTargets = (keyPairName) => {
   const [TargetGroupArn] = JSON.parse(execSync(`aws elbv2 describe-target-groups --names EC2TargetGroup --query 'TargetGroups[*].TargetGroupArn'`).toString()); 

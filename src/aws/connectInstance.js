@@ -1,4 +1,5 @@
 const { execSync } = require('child_process');
+const { getInstanceId } = require('./getInstanceId')
 
 const connectInstance = (keyPairName) => {
   console.log('Waiting for Airbyte EC2 instance to run...');

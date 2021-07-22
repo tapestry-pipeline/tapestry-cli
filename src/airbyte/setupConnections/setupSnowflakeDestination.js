@@ -20,7 +20,7 @@ const setupSnowflakeDestination = async (keyPairName, publicDNS) => {
         
         const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
         const instanceId = getInstanceId(keyPairName);
-        const s3BucketCredentials = getS3BucketCredentials(instanceId, keyPairName);
+        const s3BucketCredentials = getS3BucketCredentials(keyPairName, instanceId);
         const snowAbPass = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/ab-pass" --with-decryption').toString()).Parameter.Value;
         const snowAcctHost = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-hostname" --with-decryption').toString()).Parameter.Value;
 
