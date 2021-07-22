@@ -1,9 +1,9 @@
 const { execSync } = require('child_process');
-const { createSource, checkSourceConnection } = require('./createSource.js');
-const { createDestination, checkDestinationConnection } = require('./createDestination.js');
-const { createOperation } = require('./createOperation.js');
-const { createConnectionObject, createConnection } = require('./createConnection.js');
-const { getSourceSchema } = require('./getSourceSchema.js')
+const { createSource, checkSourceConnection } = require('../api/createSource.js');
+const { createDestination, checkDestinationConnection } = require('../api/createDestination.js');
+const { createOperation } = require('../api/createOperation.js');
+const { createConnectionObject, createConnection } = require('../api/createConnection.js');
+const { getSourceSchema } = require('../api/getSourceSchema.js')
 
 async function setupAirbyteDestination(domainName, destinationConfigObject) {
   const destinationId = await createDestination(domainName, destinationConfigObject);
@@ -28,6 +28,7 @@ async function setupAirbyteSources(domainName, sourceConfigList, destinationId, 
     }
 
     const connectionObject = await createConnectionObject(sourceId, destinationId, operationId, schema, syncObj);
+    console.log("Creating connection...")
     await createConnection(domainName, connectionObject);
   }
 }
