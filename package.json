@@ -33,6 +33,10 @@
     "child_process": "^1.0.2",
     "commander": "^8.0.0",
     "inquirer": "^8.1.2",
+<<<<<<< HEAD
     "snowflake-promise": "^4.5.0"
+=======
+    "sqlite3": "^5.0.2"
+>>>>>>> grouparoo-setup
   }
 }
