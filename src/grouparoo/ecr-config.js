@@ -1,4 +1,4 @@
-
+""
 const { execSync, exec } = require('child_process');
 
 const getRegion = () => {
@@ -19,10 +19,10 @@ const connectToECR= () => {
     // -t fantasticfour/grouparoo:latest
 
     // switch context to run build command
-    // execSync(`service start docker`)
+    // execSync(`sudo service docker start`)
     execSync(`docker context use default`);
     // // BUILD
-    execSync(`docker build -t grouparoo ./my-tapestry-project`, {stdio: 'inherit'});
+    execSync(`docker build -t grouparoo ./kickstart`, {stdio: 'inherit'});
     
     // // // CREATE REPO
     execSync(`aws ecr create-repository \
@@ -33,15 +33,15 @@ const connectToECR= () => {
 
     // // TAG
     execSync(`docker tag grouparoo:latest ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`, {stdio: 'inherit'});
-    execSync(`docker push ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`); 
-
+  
+    
 
     console.log(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`);
-    execSync(`docker context create ecs myecscontext14`, {stdio: 'inherit'});
-    execSync(`docker context use myecscontext14`);
+    execSync(`docker context create ecs myecscontext19`, {stdio: 'inherit'});
+    execSync(`docker context use myecscontext19`);
     // const imageUrl = "kmbeck428/docker-grouparoo-test"
     const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
-    execSync(`export URL=${imageUrl} && echo $URL && docker compose up`, {stdio: 'inherit'} );
+    execSync(`export URL=${imageUrl} && echo $URL && docker-compose up`, {stdio: 'inherit'} );
 
     // 
 }

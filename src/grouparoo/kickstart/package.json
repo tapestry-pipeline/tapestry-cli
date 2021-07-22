@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@grouparoo/core": "0.5.1",
+    "@grouparoo/mailchimp": "0.5.1",
     "@grouparoo/snowflake": "0.5.1",
-    "@grouparoo/ui-community": "0.5.1"
+    "@grouparoo/ui-community": "0.5.1",
+    "redis": "^3.1.2",
+    "sqlite3": "^5.0.2"
   },
   "devDependencies": {
     "@grouparoo/ui-config": "0.5.1"
@@ -21,6 +24,7 @@
   },
   "grouparoo": {
     "plugins": [
+      "@grouparoo/mailchimp",
       "@grouparoo/snowflake"
     ]
   }
