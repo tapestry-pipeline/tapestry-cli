@@ -10,23 +10,23 @@ const { storePublicDNS } = require('../aws/storePublicDNS.js');
 const { setupSnowflakeDestination } = require('../airbyte/setupConnections/setupSnowflakeDestination.js'); 
 
 module.exports = async () => {
-  // await createAirbyteWarehouse();
+  await createAirbyteWarehouse();
   
-  // console.log('Provisioning AWS cloud resources...');
-  // const keyPairName = randomizeKeyPairName();
-  // createEC2KeyPair(keyPairName); 
-  // createAirbyteStack(keyPairName);
+  console.log('Provisioning AWS cloud resources...');
+  const keyPairName = randomizeKeyPairName();
+  createEC2KeyPair(keyPairName); 
+  createAirbyteStack(keyPairName);
 
-  // console.log('Installing Airbyte on EC2 instance...')
-  // connectInstance(keyPairName);
+  console.log('Installing Airbyte on EC2 instance...')
+  connectInstance(keyPairName);
 
-  // console.log('Registering target to target group...')
-  // registerTargets(keyPairName);
+  console.log('Registering target to target group...')
+  registerTargets(keyPairName);
   
-  // console.log('Launching Airbyte UI to enter login information...')
-  // storePublicDNS(keyPairName);
+  console.log('Launching Airbyte UI to enter login information...')
+  storePublicDNS(keyPairName);
   const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
-  // launchPublicDNS(publicDNS);
+  launchPublicDNS(publicDNS);
 
   await setupSnowflakeDestination('tapestry-key-pair-bledu', publicDNS);
   
