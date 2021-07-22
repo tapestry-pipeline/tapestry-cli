@@ -18,7 +18,7 @@ async function checkSourceConnection(domainName, id) {
       return data.status;
     })
     .catch((error) => {
-      console.log("error, checkSourceConnection");
+      console.log(error);
     });
 }
 

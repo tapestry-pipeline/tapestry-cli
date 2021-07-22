@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-async function createConnectionObject(sourceId, destinationId, operationId, schema, schedule = null) {  
+async function createConnectionObject(sourceId, destinationId, operationId, schema, schedule) {  
   return {
     namespaceDefinition: "source",
     namespaceFormat: "${SOURCE_NAMESPACE}",

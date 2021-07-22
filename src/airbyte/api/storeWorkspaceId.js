@@ -19,7 +19,6 @@ async function storeWorkspaceId(domainName) {
     .post(`${domainName}/api/v1/workspaces/get_by_slug`, { slug: "default" })
     .then((response) => {
       let data = response.data;
-      console.log(data.workspaceId);
       execSync(`aws ssm put-parameter --name "/airbyte/workspace-id" --value "${data.workspaceId}" --type String --overwrite`);
     })
     .catch((error) => console.log(error));

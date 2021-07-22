@@ -1,3 +1,4 @@
+const { execSync } = require('child_process');
 const { createSource, checkSourceConnection } = require('./createSource.js');
 const { createDestination, checkDestinationConnection } = require('./createDestination.js');
 const { createOperation } = require('./createOperation.js');
@@ -6,6 +7,7 @@ const { getSourceSchema } = require('./getSourceSchema.js')
 
 async function setupAirbyteDestination(domainName, destinationConfigObject) {
   const destinationId = await createDestination(domainName, destinationConfigObject);
+  execSync(`aws ssm put-parameter --name "/airbyte/snowflake-destination-id" --value "${destinationId}" --type String --overwrite`)
   const destinationStatus = await checkDestinationConnection(domainName, destinationId);
   if (destinationStatus !== "succeeded") {
     console.log("error, check snowflake config");
@@ -13,7 +15,7 @@ async function setupAirbyteDestination(domainName, destinationConfigObject) {
   }
 }
 
-async function setupAirbyteSources(domainName, sourceConfigList, destinationId) {
+async function setupAirbyteSources(domainName, sourceConfigList, destinationId, syncObj) {
   const operationId = await createOperation(domainName, "normalization");
 
   for (const source of sourceConfigList) {
@@ -25,8 +27,7 @@ async function setupAirbyteSources(domainName, sourceConfigList, destinationId) 
       return;
     }
 
-    const connectionObject = await createConnectionObject(sourceId, destinationId, operationId, schema)
-    console.log(connectionObject);
+    const connectionObject = await createConnectionObject(sourceId, destinationId, operationId, schema, syncObj);
     await createConnection(domainName, connectionObject);
   }
 }
