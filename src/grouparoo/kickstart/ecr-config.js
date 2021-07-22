@@ -1,4 +1,3 @@
-""
 const { execSync, exec } = require('child_process');
 
 const getRegion = () => {

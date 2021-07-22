@@ -28,7 +28,7 @@ module.exports = async () => {
   const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
   launchPublicDNS(publicDNS);
 
-  await setupSnowflakeDestination('tapestry-key-pair-bledu', publicDNS);
+  await setupSnowflakeDestination('tapestry-key-pair-j4093', publicDNS);
   
   console.log('Deployment finished!');
 }
