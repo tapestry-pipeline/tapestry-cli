@@ -11,3 +11,6 @@ console.log(region)
 
 
 execSync(`aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin "${accountId}.dkr.ecr.${region}.amazonaws.com"`, {stdio:'inherit'});
+
+
+docker pull aws_account_id.dkr.ecr.us-west-2.amazonaws.com/amazonlinux:latest
