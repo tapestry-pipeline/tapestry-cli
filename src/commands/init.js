@@ -26,7 +26,7 @@ const provisionFolders = async () => {
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
   console.log(projectName);
   execSync(`mkdir ${projectName}`)
-  execSync(`cd ${projectName}  && mkdir airbyte`);
+  execSync(`cd ${projectName} && mkdir airbyte`);
   
 }
 

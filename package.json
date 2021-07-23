@@ -32,7 +32,9 @@
     "axios-retry": "^3.1.9",
     "child_process": "^1.0.2",
     "commander": "^8.0.0",
+    "fs": "^0.0.1-security",
     "inquirer": "^8.1.2",
+    "js-yaml": "^4.1.0",
     "snowflake-promise": "^4.5.0",
     "sqlite3": "^5.0.2"
   }

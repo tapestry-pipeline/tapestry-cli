@@ -1,5 +1,5 @@
-const { execSync, exec } = require('child_process');
-
+const { execSync } = require('child_process');
+// const { yamlWriter } = require('../grouparoo/barebones/yaml-writer');
 
 const getRegion = () => {
   return execSync(`aws configure get region`).toString().trim();
@@ -12,7 +12,7 @@ const getAccountId = () => {
 const region = getRegion();
 const accountId = getAccountId();
 
-const connectToECR= (repoName) => {
+const connectToECR = (repoName) => {
     // LOGIN
     execSync(`aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin "${accountId}.dkr.ecr.${region}.amazonaws.com"`, {stdio:'inherit'});
    
@@ -33,15 +33,19 @@ const connectToECR= (repoName) => {
 
     // // TAG
     execSync(`docker tag grouparoo:latest ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`, {stdio: 'inherit'});
+    
+    //   PUSH
     execSync(`docker push ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`, {stdio: 'inherit'});
 
-    
-
     console.log(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`);
-    execSync(`docker context create ecs myecscontext19`, {stdio: 'inherit'});
-    execSync(`docker context use myecscontext19`);
+    execSync(`docker context create ecs myecscontext20`, {stdio: 'inherit'});
+    execSync(`docker context use myecscontext20`);
     // const imageUrl = "kmbeck428/docker-grouparoo-test"
     const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
+
+    // writes docker-compose.yml for immediate use
+    // yamlWriter(imageUrl);
+    // execSync(`docker compose up`, { stdio: 'inherit' });
     execSync(`export URL=${imageUrl} && echo $URL && docker compose up`, {stdio: 'inherit'} );
 
     // 
