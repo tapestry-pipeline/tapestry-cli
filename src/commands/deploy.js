@@ -38,7 +38,7 @@ module.exports = async () => {
   // need to make sure user is in the cloned project folder; make this a confirmation
   console.log(`Now your Airbyte is all set up. Go to your Tapestry project folder, called ${projectName} for Grouparoo deployment to begin.`); // TODO- change to confirmation
   execSync(`git clone ${githubDeployUrl}`);
-  execSync(`cd ${projectName} && cp .env.example .env `);
+  execSync(`cd ${grouparooDirectory} && cp .env.example .env `);
   connectToECR(grouparooDirectory);
   
 
