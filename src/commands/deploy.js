@@ -35,6 +35,7 @@ module.exports = async () => {
   // await setupSnowflakeDestination('tapestry-key-pair-j4093', publicDNS);
   
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+  // need to make sure user is in the cloned project folder; make this a confirmation
   console.log(`Now your Airbyte is all set up. Go to your Tapestry project folder, called ${projectName} for Grouparoo deployment to begin.`);
   execSync(`git clone ${githubDeployUrl}`);
   connectToECR(grouparoDirectory);
