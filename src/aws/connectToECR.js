@@ -21,10 +21,10 @@ const connectToECR = (repoName) => {
     // switch context to run build command
     // execSync(`sudo service docker start`)
     execSync(`docker context use default`);
-    // // BUILD
+    // BUILD
     execSync(`docker build -t grouparoo ./${repoName}`, {stdio: 'inherit'});
     
-    // // // CREATE REPO
+    // // CREATE REPO
     execSync(`aws ecr create-repository \
     --repository-name grouparoo \
     --image-scanning-configuration scanOnPush=true \
@@ -36,16 +36,19 @@ const connectToECR = (repoName) => {
     
     //   PUSH
     execSync(`docker push ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`, {stdio: 'inherit'});
+    console.log('pushing')
 
     console.log(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`);
-    execSync(`docker context create ecs myecscontext20`, {stdio: 'inherit'});
-    execSync(`docker context use myecscontext20`);
+    execSync(`docker context create ecs myecscontext21`, {stdio: 'inherit'});
+    execSync(`docker context use myecscontext21`);
     // const imageUrl = "kmbeck428/docker-grouparoo-test"
     const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
 
     // writes docker-compose.yml for immediate use
     // yamlWriter(imageUrl);
     // execSync(`docker compose up`, { stdio: 'inherit' });
+
+    // have to install the docker compose CLI or docker desktop that comes with it : https://docs.docker.com/cloud/ecs-integration/
     execSync(`export URL=${imageUrl} && echo $URL && docker compose up`, {stdio: 'inherit'} );
 
     // 
