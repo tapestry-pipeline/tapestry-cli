@@ -1,5 +1,6 @@
 const { execSync, exec } = require('child_process');
 
+
 const getRegion = () => {
   return execSync(`aws configure get region`).toString().trim();
 }
@@ -11,7 +12,7 @@ const getAccountId = () => {
 const region = getRegion();
 const accountId = getAccountId();
 
-const connectToECR= () => {
+const connectToECR= (repoName) => {
     // LOGIN
     execSync(`aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin "${accountId}.dkr.ecr.${region}.amazonaws.com"`, {stdio:'inherit'});
    
@@ -21,7 +22,7 @@ const connectToECR= () => {
     // execSync(`sudo service docker start`)
     execSync(`docker context use default`);
     // // BUILD
-    execSync(`docker build -t grouparoo .`, {stdio: 'inherit'});
+    execSync(`docker build -t grouparoo ./${repoName}`, {stdio: 'inherit'});
     
     // // // CREATE REPO
     execSync(`aws ecr create-repository \
@@ -32,7 +33,8 @@ const connectToECR= () => {
 
     // // TAG
     execSync(`docker tag grouparoo:latest ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`, {stdio: 'inherit'});
-  
+    execSync(`docker push ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`, {stdio: 'inherit'});
+
     
 
     console.log(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`);
@@ -40,11 +42,15 @@ const connectToECR= () => {
     execSync(`docker context use myecscontext19`);
     // const imageUrl = "kmbeck428/docker-grouparoo-test"
     const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
-    execSync(`export URL=${imageUrl} && echo $URL && docker-compose up`, {stdio: 'inherit'} );
+    execSync(`export URL=${imageUrl} && echo $URL && docker compose up`, {stdio: 'inherit'} );
 
     // 
 }
-connectToECR();
+// connectToECR();
+
+module.exports = {
+  connectToECR
+}
 
   // console.log(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`);
   // execSync(`docker context create ecs myecscontext13`, {stdio: 'inherit'});

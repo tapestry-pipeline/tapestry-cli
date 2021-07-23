@@ -22,7 +22,7 @@ program
 program
   .command('init')
   .alias('i')
-  .description('Gather preliminary information')
+  .description('Gather preliminary information and create file structure')
   .action(init)
 
 program.parse(process.argv);
