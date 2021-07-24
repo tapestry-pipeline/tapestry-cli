@@ -46,7 +46,7 @@ module.exports = async () => {
   console.log(
     `Now your Airbyte is all set up. Go to your Tapestry project folder, called ${projectName} for Grouparoo deployment to begin.`
   ); // TODO- change to confirmation
-  execSync(`git clone -b ui-config ${githubDeployUrl}`);
+  execSync(`git clone ${githubDeployUrl}`);
   // execSync(`cd ${grouparooDirectory} && npm install`, {
   //   stdio: "inherit",
   // });
