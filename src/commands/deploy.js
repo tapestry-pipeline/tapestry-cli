@@ -46,10 +46,10 @@ module.exports = async () => {
   console.log(
     `Now your Airbyte is all set up. Go to your Tapestry project folder, called ${projectName} for Grouparoo deployment to begin.`
   ); // TODO- change to confirmation
-  execSync(`git clone ${githubDeployUrl}`);
-  execSync(`cd ${grouparooDirectory} && npm install`, {
-    stdio: "inherit",
-  });
+  execSync(`git clone -b ui-config ${githubDeployUrl}`);
+  // execSync(`cd ${grouparooDirectory} && npm install`, {
+  //   stdio: "inherit",
+  // });
   console.log("now getting ready for connecting to ECR...");
   // npm install -g grouparoo && grouparoo apply // TODO- Use FS to make the switch to right folder
   connectToECR(grouparooDirectory, randomString);

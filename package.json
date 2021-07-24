@@ -33,6 +33,7 @@
     "child_process": "^1.0.2",
     "commander": "^8.0.0",
     "fs": "^0.0.1-security",
+    "grouparoo": "^0.5.1",
     "inquirer": "^8.1.2",
     "js-yaml": "^4.1.0",
     "snowflake-promise": "^4.5.0",
