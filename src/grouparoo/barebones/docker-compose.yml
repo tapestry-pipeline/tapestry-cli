@@ -18,7 +18,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
   grouparoo-web:
-    image: 392072328816.dkr.ecr.us-east-2.amazonaws.com/grouparoo:latest
+    image: 982848192314.dkr.ecr.us-west-1.amazonaws.com/grouparoo:latest
     restart: always
     ports:
       - target: 3000
@@ -37,7 +37,7 @@ services:
       - grouparoo_frontend
       - grouparoo_backend
   grouparoo-worker:
-    image: 392072328816.dkr.ecr.us-east-2.amazonaws.com/grouparoo:latest
+    image: 982848192314.dkr.ecr.us-west-1.amazonaws.com/grouparoo:latest
     restart: always
     environment:
       REDIS_URL: redis://redis:6379/0

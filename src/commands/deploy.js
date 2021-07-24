@@ -1,5 +1,5 @@
 const { execSync, exec } = require('child_process');
-const { randomizeKeyPairName } = require('../utils/randomizeKeyPairName.js');
+const { getRandomString } = require('../utils/getRandomString.js');
 const { launchPublicDNS } = require('../utils/launchPublicDNS.js'); 
 const { createAirbyteWarehouse } = require('../airbyte/warehouseSetup/createAirbyteWarehouse.js');
 const { createEC2KeyPair } = require('../aws/createEC2KeyPair.js');
@@ -17,7 +17,8 @@ module.exports = async () => {
   // await createAirbyteWarehouse();
   
   // console.log('Provisioning AWS cloud resources...');
-  // const keyPairName = randomizeKeyPairName();
+  const randomString = getRandomString(); 
+  const keyPairName = "tapestry-key-pair" + randomString; 
   // createEC2KeyPair(keyPairName); 
   // createAirbyteStack(keyPairName);
 
@@ -38,11 +39,9 @@ module.exports = async () => {
   // need to make sure user is in the cloned project folder; make this a confirmation
   console.log(`Now your Airbyte is all set up. Go to your Tapestry project folder, called ${projectName} for Grouparoo deployment to begin.`); // TODO- change to confirmation
   execSync(`git clone ${githubDeployUrl}`);
-  execSync(`cd ${grouparooDirectory} && cp .env.example .env `);
-  connectToECR(grouparooDirectory);
-  
-
-  
+  execSync(`cd ${grouparooDirectory} && cp .env.example .env && npm install -g grouparoo && npm install && grouparoo apply`); // TODO- Use FS to make the switch to right folder
+  connectToECR(grouparooDirectory, randomString);
   
   console.log('Deployment finished!');
+
 }
