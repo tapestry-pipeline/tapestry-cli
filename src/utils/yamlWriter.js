@@ -1,9 +1,21 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
+const { execSync } = require("child_process");
+
+
 
 const yamlWriter = (imageUrl) => {
+  // const secretId = execSync(`aws secretsmanager get-secret-value --secret-id snowflake/acct-hostname`);
+  // const arn = execSync(`aws secretsmanager get-secret-value --secret-id snowflake/acct-hostname`);
+
   const data = {
     version: '3.1',
+    // secrets: {
+    //   'snow-host': {
+    //     name: 'arn:aws:secretsmanager:us-east-2:392072328816:secret:snowflake/acct-hostname-8u5GGK',
+    //     external: true
+    //   }
+    // },
     services: {
       redis: {
         'container_name': 'grouparoo_redis',
@@ -26,13 +38,14 @@ const yamlWriter = (imageUrl) => {
         ],
         volumes: [
           'postgres-data:/var/lib/postgresql/data'
-        ]
+        ],
       },
       'grouparoo-web': {
         image: `${imageUrl}`,
         restart: 'always',
         ports: [
-          { target: 3000,
+          {
+            target: 3000,
             'x-aws-protocol': 'http'
           }
         ],
@@ -42,8 +55,11 @@ const yamlWriter = (imageUrl) => {
           'DATABASE_URL': 'postgresql://postgres:password@db:5432/grouparoo_docker',
           'WEB_SERVER': 'true',
           'WORKERS': 0,
-          'SERVER_TOKEN': 'default-server-token'
+          'SERVER_TOKEN': 'default-server-token',
         },
+        'env_file': [
+          '.env'
+        ],
         'depends_on': [
           'db',
           'redis'
@@ -51,7 +67,10 @@ const yamlWriter = (imageUrl) => {
         networks: [
           'grouparoo_frontend',
           'grouparoo_backend'
-        ]
+        ],
+        // secrets: [
+        //   'snow-host'
+        // ],
       },
       'grouparoo-worker': {
         'image': `${imageUrl}`,
@@ -71,7 +90,16 @@ const yamlWriter = (imageUrl) => {
         networks: [
           'grouparoo_frontend',
           'grouparoo_backend'
-        ]
+        ],
+        'env_file': [
+          '.env'
+        ],
+        // secrets: [
+        //   'snow-host'
+        // ],
+        // environment: [
+        //   'SNOW_HOSTNAME=/run/secrets/snow-host'
+        // ]
       },
     },
     'networks': {
@@ -82,7 +110,7 @@ const yamlWriter = (imageUrl) => {
       'postgres-data': null
     }
   };
-  
+
   const yamlStr = yaml.dump(data);
   fs.writeFileSync('docker-compose.yml', yamlStr, 'utf8');
 }

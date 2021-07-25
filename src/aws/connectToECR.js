@@ -24,7 +24,7 @@ const connectToECR = (repoName, randomString) => {
   // BUILD
   execSync(`docker build -t grouparoo ./${repoName}`, { stdio: "inherit" });
 
-  // // CREATE REPO
+  // CREATE REPO
   execSync(
     `aws ecr create-repository \
     --repository-name grouparoo \
@@ -33,30 +33,30 @@ const connectToECR = (repoName, randomString) => {
     { stdio: "inherit" }
   );
 
-  // // TAG
+  // TAG
   execSync(
     `docker tag grouparoo:latest ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`,
     { stdio: "inherit" }
   );
 
-  //   PUSH
+  // PUSH
   execSync(
     `docker push ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`,
     { stdio: "inherit" }
   );
-  console.log("pushing");
+  // console.log("pushing");
 
-  console.log(
-    `Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`
-  );
-  execSync(`docker context create ecs myecscontext_${randomString}`, { stdio: "inherit" });
-  execSync(`docker context use myecscontext_${randomString}`);
+  // console.log(
+  //   `Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`
+  // );
+  // execSync(`docker context create ecs myecscontext_${randomString}`, { stdio: "inherit" });
+  // execSync(`docker context use myecscontext_${randomString}`);
   // const imageUrl = "kmbeck428/docker-grouparoo-test"
   const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
 
   // writes docker-compose.yml for immediate use
   yamlWriter(imageUrl);
-  execSync(`docker compose up`, { stdio: "inherit" });
+  // execSync(`docker compose up`, { stdio: "inherit" });
 
   //
 };
