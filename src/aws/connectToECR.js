@@ -2,7 +2,6 @@ const { execSync } = require("child_process");
 const { yamlWriter } = require("../utils/yamlWriter.js");
 const { envWriter } = require("../utils/envWriter.js");
 
-
 const getRegion = () => {
   return execSync(`aws configure get region`).toString().trim();
 };
@@ -11,7 +10,7 @@ const getAccountId = () => {
   return JSON.parse(execSync(`aws sts get-caller-identity`)).Account;
 };
 
-const connectToECR = (repoName, randomString) => {
+const connectToECR = (directoryName, randomString) => {
   const region = getRegion();
   const accountId = getAccountId();
   // LOGIN
@@ -23,7 +22,7 @@ const connectToECR = (repoName, randomString) => {
   // switch context to run build command
   execSync(`docker context use default`);
   // BUILD
-  execSync(`docker build -t grouparoo ./${repoName}`, { stdio: "inherit" });
+  execSync(`docker build -t grouparoo ./${directoryName}`, { stdio: "inherit" });
 
   // CREATE REPO
   execSync(
@@ -55,7 +54,7 @@ const connectToECR = (repoName, randomString) => {
 
   // writes docker-compose.yml for immediate use
   yamlWriter(imageUrl);
-  envWriter(repoName);
+  envWriter(directoryName);
   execSync(`docker compose up`, { stdio: "inherit" });
 
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
@@ -66,5 +65,5 @@ const connectToECR = (repoName, randomString) => {
 
 
 module.exports = {
-  connectToECR,
+  connectToECR
 };

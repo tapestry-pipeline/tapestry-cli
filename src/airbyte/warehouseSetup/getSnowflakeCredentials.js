@@ -9,7 +9,7 @@ const validateInput = async (input) => {
 }
 
 const getSnowflakeCredentials = async () => {
-  console.log('Hello! First we need to get some information about your Snowflake credentials:');
+  console.log('Now we need to get some information about your Snowflake credentials:');
 
   const questions = [
     { type: 'input', name: 'snowHostname', message: 'Snowflake Account Hostname (e.g., "<hostname>.snowflakecomputing.com"):', validate: validateInput },
