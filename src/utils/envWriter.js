@@ -3,8 +3,6 @@ const fs = require('fs');
 // require('dotenv').config()
 // const account = process.env.SNOW_HOSTNAME
 
-  
-
 
 const envWriter = () => {
   // const host = 'dla27293.us-east-1';
@@ -16,8 +14,6 @@ const envWriter = () => {
 
   fs.writeFileSync('.env', snowflake, 'utf8');
 }
-
-envWriter();
 
 
 module.exports = {

@@ -2,14 +2,14 @@ const inquirer = require('inquirer');
 const { execSync } = require('child_process');
 
 const validateInput = async (input) => {
-   if (input === '') {
-     return 'Field required! Must provide input!'
-   };
-   return true;
+  if (input === '') {
+    return 'Field required! Must provide input!'
+  };
+  return true;
 }
 
 const questions = [
-  { type: 'input', name: 'projectName', message: 'Project name:', default: 'tapestry-project'},
+  { type: 'input', name: 'projectName', message: 'Project name:', default: 'tapestry-project' },
 ];
 
 const gatherInfo = async () => {
@@ -25,9 +25,8 @@ const gatherInfo = async () => {
 const provisionFolders = async () => {
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
   console.log(projectName);
-  execSync(`mkdir ${projectName}`)
+  execSync(`mkdir ${projectName}`);
   execSync(`cd ${projectName} && mkdir airbyte`);
-  
 }
 
 
