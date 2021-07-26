@@ -58,9 +58,12 @@ const connectToECR = (repoName, randomString) => {
   envWriter(repoName);
   execSync(`docker compose up`, { stdio: "inherit" });
 
+  const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+  // TODO - currently stores projectName as grouparoo stack name -> maybe we can rename it to make it more consistent with the other stack name's format?
+  execSync(`aws ssm put-parameter --name "/grouparoo/stack-name" --value "${projectName}" --type String --overwrite`);
   //
 };
-// connectToECR();
+
 
 module.exports = {
   connectToECR,
