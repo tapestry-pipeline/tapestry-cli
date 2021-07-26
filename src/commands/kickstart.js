@@ -2,8 +2,8 @@ const { execSync } = require('child_process');
 const { setupAirbyteSources } = require('../airbyte/setupConnections/airbyteSetup.js');
 const { buildZoomSource } = require('../airbyte/configObjects/buildZoomSource.js');
 const { buildSalesforceSource } = require('../airbyte/configObjects/buildSalesforceSource.js');
-
 const inquirer = require('inquirer');
+const grouparooKickstartUrl = ""
 
 const validateInput = async (input) => {
   if (input === '') {
@@ -62,19 +62,6 @@ const sourcesSetup = async () => {
     { type: 'input', name: 'listId', message: 'Mailchimp Destination - Audience ID:', validate: validateInput },
   ]; 
 
-  // /mailchimp/apiKey
-  // /mailchimp/listId
-
-  // await inquirer
-  // .prompt(questions)
-  // .then(async answers => {
-    
-  //   execSync(`aws ssm put-parameter --name "/snowflake/acct-username" --value "${answers.snowUsername}" --type SecureString --overwrite`);
-  //   execSync(`aws ssm put-parameter --name "/snowflake/acct-pass" --value "${answers.snowAcctPass}" --type SecureString --overwrite`);
-  //   execSync(`aws ssm put-parameter --name "/snowflake/ab-user-pass" --value "${answers.snowAbUserPass}" --type SecureString --overwrite`);
-  // })
-  // .catch(error => console.log(error));
-
   const questions = zoomQuestions.concat(salesForceQuestions, syncQuestion, mailchimpQuestions);
 
   await inquirer
@@ -89,7 +76,6 @@ const sourcesSetup = async () => {
         workspaceId
       );
       
-
       execSync(`aws ssm put-parameter --name "/mailchimp/apiKey" --value "${answers.apiKey}" --type SecureString --overwrite`);
       execSync(`aws ssm put-parameter --name "/mailchimp/listId" --value "${answers.listId}" --type SecureString --overwrite`);
 
