@@ -12,7 +12,6 @@ const getAccountId = () => {
 };
 
 const connectToECR = (repoName, randomString) => {
-  console.log("hello!");
   const region = getRegion();
   const accountId = getAccountId();
   // LOGIN
@@ -66,19 +65,3 @@ const connectToECR = (repoName, randomString) => {
 module.exports = {
   connectToECR,
 };
-
-// console.log(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`);
-// execSync(`docker context create ecs myecscontext13`, {stdio: 'inherit'});
-// execSync(`docker context use myecscontext13`);
-// // const imageUrl = "kmbeck428/docker-grouparoo-test"
-// const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
-// execSync(`export URL=${imageUrl} && echo $URL && docker compose up`, {stdio: 'inherit'} );
-// execSync(`${URL}`, {stdio: 'inherit'});
-// execSync(`docker compose up`);
-
-// --sk
-// --skip-keypress
-
-// --from
-
-// let password = execSync(`aws ecr get-login-password --region ${region}`).toString();

@@ -4,15 +4,15 @@ const buildSnowflakeDestination = (password, hostname, s3Info, workspaceId) => {
     "connectionConfiguration": {
       "loading_method": s3Info,
       "password": password,
-      "username": "AIRBYTE_USER",
-      "schema": "AIRBYTE_SCHEMA",
-      "database": "AIRBYTE_DATABASE",
-      "warehouse": "AIRBYTE_WAREHOUSE",
-      "role": "AIRBYTE_ROLE",
+      "username": "TAPESTRY_USER",
+      "schema": "TAPESTRY_SCHEMA",
+      "database": "TAPESTRY_DATABASE",
+      "warehouse": "TAPESTRY_WAREHOUSE",
+      "role": "TAPESTRY_ROLE",
       "host": `${hostname}.snowflakecomputing.com`
     },
     "workspaceId": workspaceId,
-    "name": "Snowflake API Test"
+    "name": "Snowflake Destination"
   }
 }
 

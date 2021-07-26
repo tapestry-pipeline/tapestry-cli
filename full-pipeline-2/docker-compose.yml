@@ -1,4 +1,4 @@
-version: "3.1"
+version: '3.1'
 services:
   redis:
     container_name: grouparoo_redis
@@ -6,7 +6,6 @@ services:
     restart: always
     networks:
       - grouparoo_backend
-
   db:
     container_name: grouparoo_db
     image: postgres
@@ -17,10 +16,9 @@ services:
     networks:
       - grouparoo_backend
     volumes:
-      - "postgres-data:/var/lib/postgresql/data"
-
+      - postgres-data:/var/lib/postgresql/data
   grouparoo-web:
-    image: "${URL}"
+    image: 982848192314.dkr.ecr.us-west-1.amazonaws.com/grouparoo:latest
     restart: always
     ports:
       - target: 3000
@@ -29,26 +27,26 @@ services:
       PORT: 3000
       REDIS_URL: redis://redis:6379/0
       DATABASE_URL: postgresql://postgres:password@db:5432/grouparoo_docker
-      WEB_SERVER: "true"
+      WEB_SERVER: 'true'
       WORKERS: 0
-      SERVER_TOKEN: "default-server-token"
+      SERVER_TOKEN: default-server-token
+    env_file:
+      - .env
     depends_on:
       - db
       - redis
     networks:
       - grouparoo_frontend
       - grouparoo_backend
-
   grouparoo-worker:
-    image: "${URL}"
-    #"${URL}"
+    image: 982848192314.dkr.ecr.us-west-1.amazonaws.com/grouparoo:latest
     restart: always
     environment:
       REDIS_URL: redis://redis:6379/0
       DATABASE_URL: postgresql://postgres:password@db:5432/grouparoo_docker
-      WEB_SERVER: "false"
+      WEB_SERVER: 'false'
       WORKERS: 10
-      SERVER_TOKEN: "default-server-token"
+      SERVER_TOKEN: default-server-token
     depends_on:
       - db
       - redis
@@ -56,11 +54,10 @@ services:
     networks:
       - grouparoo_frontend
       - grouparoo_backend
-
+    env_file:
+      - .env
 networks:
-  grouparoo_frontend:
-  grouparoo_backend:
-
+  grouparoo_frontend: null
+  grouparoo_backend: null
 volumes:
-  postgres-data:
-
+  postgres-data: null

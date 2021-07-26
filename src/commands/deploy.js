@@ -1,4 +1,4 @@
-const { execSync, exec } = require("child_process");
+const { execSync } = require("child_process");
 const { getRandomString } = require("../utils/getRandomString.js");
 const { launchPublicDNS } = require("../utils/launchPublicDNS.js");
 const { createAirbyteWarehouse } = require("../airbyte/warehouseSetup/createAirbyteWarehouse.js");
@@ -8,44 +8,47 @@ const { connectInstance } = require("../aws/connectInstance.js");
 const { registerTargets } = require("../aws/registerTargets");
 const { storePublicDNS } = require("../aws/storePublicDNS.js");
 const { setupSnowflakeDestination } = require("../airbyte/setupConnections/setupSnowflakeDestination.js");
-const githubDeployUrl = "https://github.com/tapestry-pipeline/deploy-config-grouparoo.git";
+const grouparooDeployUrl = "https://github.com/tapestry-pipeline/deploy-config-grouparoo.git";
 const { connectToECR } = require("../aws/connectToECR.js");
 const grouparooDirectory = "deploy-config-grouparoo";
+const inquirer = require('inquirer');
 
 module.exports = async () => {
-  await createAirbyteWarehouse();
+  const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+  const pathConfirmation = [{type: 'confirm', name: 'confirmPath', message: `Go to your Tapestry project folder, called ${projectName} for deployment to begin. Confirm when you are ready.`}];
 
-  console.log('Provisioning AWS cloud resources...');
-  const randomString = getRandomString();
-  const keyPairName = "tapestry-key-pair" + randomString;
-  createEC2KeyPair(keyPairName);
-  createAirbyteStack(keyPairName);
+  await inquirer
+    .prompt(pathConfirmation)
+    .then(async ({ confirmPath }) => {
+      if (confirmPath) {
+        await createAirbyteWarehouse();
 
-  console.log('Installing Airbyte on EC2 instance...')
-  connectInstance(keyPairName);
+        console.log('Provisioning AWS cloud resources...');
+        const randomString = getRandomString();
+        const keyPairName = "tapestry-key-pair" + randomString;
+        createEC2KeyPair(keyPairName);
+        createAirbyteStack(projectName, keyPairName, randomString);
 
-  console.log('Registering target to target group...')
-  registerTargets(keyPairName);
+        console.log('Installing Airbyte on EC2 instance...')
+        connectInstance(keyPairName);
 
-  console.log('Launching Airbyte UI to enter login information...')
-  storePublicDNS(keyPairName);
-  const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
-  launchPublicDNS(publicDNS);
+        console.log('Registering target to target group...')
+        registerTargets(keyPairName);
 
-  await setupSnowflakeDestination('tapestry-key-pair-j4093', publicDNS);
+        console.log('Launching Airbyte UI to enter login information...')
+        storePublicDNS(projectName);
+        const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
+        launchPublicDNS(publicDNS);
 
-  const projectName = JSON.parse(
-    execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
-  // TODO need to make sure user is in the cloned project folder; make this a confirmation
-  console.log(`Now your Airbyte is all set up. Go to your Tapestry project folder, called ${projectName} for Grouparoo deployment to begin.`); // TODO- change to confirmation
-  execSync(`git clone ${githubDeployUrl}`);
-  // execSync(`cd ${grouparooDirectory} && npm install`, {
-  //   stdio: "inherit",
-  // });
+        await setupSnowflakeDestination(keyPairName, publicDNS);
 
-  console.log("now getting ready for connecting to ECR...");
-  // TODO- Use FS to make the switch to right folder
-  connectToECR(grouparooDirectory, randomString);
+        console.log("Airbyte deployment is complete. Now Grouparoo setup will begin...");
+        execSync(`git clone ${grouparooDeployUrl}`);
 
-  console.log("Deployment finished!");
+        console.log("now getting ready for connecting to ECR...");
+       
+        connectToECR(grouparooDirectory, randomString);
+        console.log("Deployment finished!");
+      }
+    })
 };

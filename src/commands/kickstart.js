@@ -47,17 +47,35 @@ const sourcesSetup = async () => {
   ]
 
   const zoomQuestions = [
-    { type: 'input', name: 'jwtToken', message: 'Zoom - JWT Token:', validate: validateInput },
+    { type: 'input', name: 'jwtToken', message: 'Zoom Source - JWT Token:', validate: validateInput },
   ];
 
   const salesForceQuestions = [
-    { type: 'input', name: 'clientId', message: 'Salesforce - Client ID:', validate: validateInput },
-    { type: 'input', name: 'clientSecret', message: 'Salesforce - Client Secret:', validate: validateInput },
-    { type: 'input', name: 'refreshToken', message: 'Salesforce - Refresh Token:', validate: validateInput },
-    { type: 'input', name: 'startDate', message: 'Salesforce - Start Date (e.g., "2021-01-25T00:00:00Z"):', validate: validateInput },//TODO - default current day and time?
+    { type: 'input', name: 'clientId', message: 'Salesforce Source - Client ID:', validate: validateInput },
+    { type: 'input', name: 'clientSecret', message: 'Salesforce Source - Client Secret:', validate: validateInput },
+    { type: 'input', name: 'refreshToken', message: 'Salesforce Source - Refresh Token:', validate: validateInput },
+    { type: 'input', name: 'startDate', message: 'Salesforce Source - Start Date (e.g., "2021-01-25T00:00:00Z"):', validate: validateInput },//TODO - default current day and time?
   ];
 
-  const questions = zoomQuestions.concat(salesForceQuestions, syncQuestion);
+  const mailchimpQuestions = [
+    { type: 'input', name: 'apiKey', message: 'Mailchimp Destination - API Key', validate: validateInput },
+    { type: 'input', name: 'listId', message: 'Mailchimp Destination - Audience ID:', validate: validateInput },
+  ]; 
+
+  // /mailchimp/apiKey
+  // /mailchimp/listId
+
+  // await inquirer
+  // .prompt(questions)
+  // .then(async answers => {
+    
+  //   execSync(`aws ssm put-parameter --name "/snowflake/acct-username" --value "${answers.snowUsername}" --type SecureString --overwrite`);
+  //   execSync(`aws ssm put-parameter --name "/snowflake/acct-pass" --value "${answers.snowAcctPass}" --type SecureString --overwrite`);
+  //   execSync(`aws ssm put-parameter --name "/snowflake/ab-user-pass" --value "${answers.snowAbUserPass}" --type SecureString --overwrite`);
+  // })
+  // .catch(error => console.log(error));
+
+  const questions = zoomQuestions.concat(salesForceQuestions, syncQuestion, mailchimpQuestions);
 
   await inquirer
     .prompt(questions)
@@ -70,6 +88,10 @@ const sourcesSetup = async () => {
         answers.startDate,
         workspaceId
       );
+      
+
+      execSync(`aws ssm put-parameter --name "/mailchimp/apiKey" --value "${answers.apiKey}" --type SecureString --overwrite`);
+      execSync(`aws ssm put-parameter --name "/mailchimp/listId" --value "${answers.listId}" --type SecureString --overwrite`);
 
       const syncObj = buildSyncScheduleObj(answers.syncChoice);
       

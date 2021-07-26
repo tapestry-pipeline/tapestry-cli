@@ -1,5 +1,7 @@
 const inquirer = require('inquirer');
 const { execSync } = require('child_process');
+const process = require('process');
+const airbyteRepo = "https://github.com/tapestry-pipeline/airbyte.git"
 
 const validateInput = async (input) => {
   if (input === '') {
@@ -26,9 +28,9 @@ const provisionFolders = async () => {
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
   console.log(projectName);
   execSync(`mkdir ${projectName}`);
-  execSync(`cd ${projectName} && mkdir airbyte`);
+  process.chdir(`${projectName}`);
+  execSync(`git clone ${airbyteRepo}`);
 }
-
 
 module.exports = async () => {
   await gatherInfo();

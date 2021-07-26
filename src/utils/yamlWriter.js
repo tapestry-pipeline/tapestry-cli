@@ -2,8 +2,6 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const { execSync } = require("child_process");
 
-
-
 const yamlWriter = (imageUrl) => {
   // const secretId = execSync(`aws secretsmanager get-secret-value --secret-id snowflake/acct-hostname`);
   // const arn = execSync(`aws secretsmanager get-secret-value --secret-id snowflake/acct-hostname`);
