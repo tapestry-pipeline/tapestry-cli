@@ -37,6 +37,7 @@
     "inquirer": "^8.1.2",
     "js-yaml": "^4.1.0",
     "snowflake-promise": "^4.5.0",
-    "sqlite3": "^5.0.2"
+    "sqlite3": "^5.0.2",
+    "tapestry": "*"
   }
 }

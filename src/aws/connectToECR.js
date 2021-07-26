@@ -1,5 +1,7 @@
 const { execSync } = require("child_process");
 const { yamlWriter } = require("../utils/yamlWriter.js");
+const { envWriter } = require("../utils/envWriter.js");
+
 
 const getRegion = () => {
   return execSync(`aws configure get region`).toString().trim();
@@ -25,13 +27,13 @@ const connectToECR = (repoName, randomString) => {
   execSync(`docker build -t grouparoo ./${repoName}`, { stdio: "inherit" });
 
   // CREATE REPO
-  execSync(
-    `aws ecr create-repository \
-    --repository-name grouparoo \
-    --image-scanning-configuration scanOnPush=true \
-    --region ${region}`,
-    { stdio: "inherit" }
-  );
+  // execSync(
+  //   `aws ecr create-repository \
+  //   --repository-name grouparoo \
+  //   --image-scanning-configuration scanOnPush=true \
+  //   --region ${region}`,
+  //   { stdio: "inherit" }
+  // );
 
   // TAG
   execSync(
@@ -56,6 +58,7 @@ const connectToECR = (repoName, randomString) => {
 
   // writes docker-compose.yml for immediate use
   yamlWriter(imageUrl);
+  envWriter();
   // execSync(`docker compose up`, { stdio: "inherit" });
 
   //
