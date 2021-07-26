@@ -56,7 +56,7 @@ const connectToECR = (repoName, randomString) => {
 
   // writes docker-compose.yml for immediate use
   yamlWriter(imageUrl);
-  envWriter();
+  envWriter(repoName);
   execSync(`docker compose up`, { stdio: "inherit" });
 
   //
