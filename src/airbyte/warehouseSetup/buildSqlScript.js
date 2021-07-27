@@ -18,6 +18,21 @@ const buildSqlScript = (password) => {
     "commit;",
     "begin;",
     "grant OWNERSHIP on schema TAPESTRY_SCHEMA to role TAPESTRY_ROLE;",
+    "commit;",
+    "begin;",
+    "USE DATABASE TAPESTRY_DATABASE;",
+    "CREATE SCHEMA IF NOT EXISTS DBT_TAPESTRY;",
+    "commit;",
+    "begin;",
+    "grant OWNERSHIP on schema DBT_TAPESTRY to role TAPESTRY_ROLE;",
+    "commit;",
+    "begin;",
+    "USE DATABASE TAPESTRY_DATABASE;",
+    "USE SCHEMA DBT_TAPESTRY;",
+    "create table EMAIL_MODEL(EMAIL string, FNAME string, LNAME string);",
+    "commit;",
+    "begin",
+    "grant OWNERSHIP on table EMAIL_MODEL to role TAPESTRY_ROLE;",
     "commit;"
   ];
 }
