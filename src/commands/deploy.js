@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const { execSync } = require('child_process');
 const { deployAirbyte } = require("../airbyte/deployAirbyte.js");
 const { deployGrouparoo } = require('../grouparoo/deployGrouparoo.js')
 const { getRandomString } = require("../utils/getRandomString.js");
@@ -16,7 +17,7 @@ module.exports = async () => {
     .then(async ({ confirmPath }) => {
       if (confirmPath) {
         deployAirbyte(projectName, randomString);
-        deployGrouparoo(randomString, grouparooDeployRepoUrl, grouparooDirectory);
+        // deployGrouparoo(randomString, grouparooDeployRepoUrl, grouparooDirectory);
         console.log("Deployment finished!");
       }
     })
