@@ -1,15 +1,15 @@
 const { execSync } = require("child_process");
 const { launchPublicDNS } = require("../utils/launchPublicDNS.js");
-const { createAirbyteWarehouse } = require("/warehouseSetup/createAirbyteWarehouse.js");
+const { createAirbyteWarehouse } = require("./warehouseSetup/createAirbyteWarehouse.js");
 const { createEC2KeyPair } = require("../aws/createEC2KeyPair.js");
 const { createAirbyteStack } = require("../aws/createAirbyteStack.js");
 const { connectInstance } = require("../aws/connectInstance.js");
 const { registerTargets } = require("../aws/registerTargets");
 const { storePublicDNS } = require("../aws/storePublicDNS.js");
-const { setupSnowflakeDestination } = require("/setupConnections/setupSnowflakeDestination.js");
+const { setupSnowflakeDestination } = require("./setupConnections/setupSnowflakeDestination.js");
 
 
-const deployAirbyte = (projectName, randomString) => {
+const deployAirbyte = async (projectName, randomString) => {
   await createAirbyteWarehouse();
 
   console.log('Provisioning AWS cloud resources...');

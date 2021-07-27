@@ -9,6 +9,6 @@ const grouparooDirectory = "grouparoo-config-kickstart";
 module.exports = async () => {
   const randomString = getRandomString();
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
-  kickstartAirbyte(projectName, randomString);
+  await kickstartAirbyte(projectName, randomString);
   deployGrouparoo(randomString, grouparooKickstartRepoUrl, grouparooDirectory);
 }

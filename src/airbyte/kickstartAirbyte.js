@@ -1,8 +1,9 @@
 const inquirer = require('inquirer');
-const { deployAirbyte } = require("/deployAirbyte.js");
-const { setupAirbyteSources } = require('/setupConnections/airbyteSetup.js');
-const { buildZoomSource } = require('/configObjects/buildZoomSource.js');
-const { buildSalesforceSource } = require('/configObjects/buildSalesforceSource.js');
+const { execSync } = require("child_process");
+const { deployAirbyte } = require("./deployAirbyte.js");
+const { setupAirbyteSources } = require('./setupConnections/airbyteSetup.js');
+const { buildZoomSource } = require('./configObjects/buildZoomSource.js');
+const { buildSalesforceSource } = require('./configObjects/buildSalesforceSource.js');
 
 const validateInput = async (input) => {
   if (input === '') {
@@ -33,8 +34,7 @@ const buildSyncScheduleObj = (syncChoice) => {
   }
 }
 
-const kickstartAirbyte = (projectName, randomString) => {
-  const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
+const kickstartAirbyte = async (projectName, randomString) => {
   const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
   
   const syncChoices = [
@@ -83,6 +83,7 @@ const kickstartAirbyte = (projectName, randomString) => {
       const destinationId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/snowflake-destination-id"').toString()).Parameter.Value;
 
       await deployAirbyte(projectName, randomString);
+      const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
       await setupAirbyteSources(publicDNS, [zoomBody, salesforceSourceBody], destinationId, syncObj);
     })
     .catch(error => console.log(error));
