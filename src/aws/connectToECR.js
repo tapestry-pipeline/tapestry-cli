@@ -1,19 +1,14 @@
 const { execSync } = require("child_process");
 const { yamlWriter } = require("../utils/yamlWriter.js");
 const { envWriter } = require("../utils/envWriter.js");
+const { getRegion } = require("./getRegion.js");
+const { getAccountId } = require("./getAccountId.js");
 
-const getRegion = () => {
-  return execSync(`aws configure get region`).toString().trim();
-};
-
-const getAccountId = () => {
-  return JSON.parse(execSync(`aws sts get-caller-identity`)).Account;
-};
 
 const connectToECR = (directoryName, randomString) => {
   const region = getRegion();
   const accountId = getAccountId();
-  LOGIN
+  // LOGIN
   execSync(
     `aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin "${accountId}.dkr.ecr.${region}.amazonaws.com"`,
     { stdio: "inherit" }

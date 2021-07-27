@@ -29,6 +29,7 @@ const getSnowflakeCredentials = async () => {
     .catch(error => console.log(error));
 }
 
+
 module.exports = {
   getSnowflakeCredentials
 }
