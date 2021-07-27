@@ -29,7 +29,7 @@ const deployAirbyte = async (projectName, randomString) => {
   const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
   launchPublicDNS(publicDNS);
 
-  await setupSnowflakeDestination(keyPairName, publicDNS);
+  await setupSnowflakeDestination(keyPairName, publicDNS, randomString);
 
   console.log("Airbyte deployment is complete.");
 }

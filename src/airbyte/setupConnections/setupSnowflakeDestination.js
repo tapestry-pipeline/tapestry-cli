@@ -6,7 +6,7 @@ const { buildSnowflakeDestination } = require('../configObjects/buildSnowflakeDe
 const { getInstanceId } = require('../../aws/getInstanceId.js'); 
 const { getS3BucketCredentials } = require('../../aws/getS3BucketCredentials.js');
 
-const setupSnowflakeDestination = async (keyPairName, publicDNS) => {
+const setupSnowflakeDestination = async (keyPairName, publicDNS, randomString) => {
   const loginConfirmation = [{type: 'confirm', name: 'confirmAbLogin', message: 'Please enter your email in the browser and click "continue" to create your workspace. \n Be sure to "skip onboarding step"! Confirm when you are ready.'}];
 
   await inquirer
@@ -20,7 +20,7 @@ const setupSnowflakeDestination = async (keyPairName, publicDNS) => {
         
         const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
         const instanceId = getInstanceId(keyPairName);
-        const s3BucketCredentials = getS3BucketCredentials(keyPairName, instanceId);
+        const s3BucketCredentials = getS3BucketCredentials(randomString, instanceId);
         const snowAbPass = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/ab-user-pass" --with-decryption').toString()).Parameter.Value;
         const snowAcctHost = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-hostname" --with-decryption').toString()).Parameter.Value;
 
