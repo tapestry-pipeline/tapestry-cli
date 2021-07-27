@@ -32,10 +32,12 @@ program
   .alias('t')
   .description('Tear down all AWS resources associated with project')
   .action(teardown)
+
 program
   .command("rebuild")
   .alias("r")
   .description("Rebuild grouparoo image and push it to AWS Elastic Container Repository")
   .action(rebuild)
+
 program.parse(process.argv);
 
