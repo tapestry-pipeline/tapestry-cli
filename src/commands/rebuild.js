@@ -1,6 +1,6 @@
 const { execSync } = require("child_process");
-const { getRegion } = require("./aws/getRegion.js");
-const { getAccountId } = require("./aws/getAccountId.js");
+const { getRegion } = require("../aws/getRegion.js");
+const { getAccountId } = require("../aws/getAccountId.js");
 
 const rebuild = () => {
     const region = getRegion();

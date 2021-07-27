@@ -9,7 +9,6 @@ const deployGrouparoo = (randomString, grouparooDeployRepoUrl, grouparooDirector
   connectToECR(grouparooDirectory, randomString);
 }
 
-
 module.exports = {
   deployGrouparoo
 }
