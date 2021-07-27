@@ -1,8 +1,9 @@
 const axios = require("axios");
 
-async function createOperation(domainName) {
-  let body = {
-    name: "Normalization for Snowfake",
+async function createOperation(domainName, workspaceId) {
+  const body = {
+    workspaceId, 
+    name: "Normalization for Snowflake",
     operatorConfiguration: {
       operatorType: "normalization",
       normalization: {
@@ -13,7 +14,7 @@ async function createOperation(domainName) {
   return await axios
     .post(`${domainName}/api/v1/operations/create`, body)
     .then((response) => {
-      let data = response.data;
+      const data = response.data;
       return data.operationId;
     })
     .catch((error) => {

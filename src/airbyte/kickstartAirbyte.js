@@ -35,8 +35,6 @@ const buildSyncScheduleObj = (syncChoice) => {
 }
 
 const kickstartAirbyte = async (projectName, randomString) => {
-  const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
-  
   const syncChoices = [
     'manual', 'Every hour', 'Every 6 hours', 
   ];
@@ -66,6 +64,11 @@ const kickstartAirbyte = async (projectName, randomString) => {
   await inquirer
     .prompt(questions)
     .then(async answers => {
+      await deployAirbyte(projectName, randomString);
+      
+      const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
+      const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
+      
       const zoomBody = buildZoomSource(answers.jwtToken, workspaceId);
       const salesforceSourceBody = buildSalesforceSource(
         answers.clientId,
@@ -79,12 +82,9 @@ const kickstartAirbyte = async (projectName, randomString) => {
       execSync(`aws ssm put-parameter --name "/mailchimp/listId" --value "${answers.listId}" --type SecureString --overwrite`);
 
       const syncObj = buildSyncScheduleObj(answers.syncChoice);
-      
       const destinationId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/snowflake-destination-id"').toString()).Parameter.Value;
-
-      await deployAirbyte(projectName, randomString);
-      const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
-      await setupAirbyteSources(publicDNS, [zoomBody, salesforceSourceBody], destinationId, syncObj);
+      
+      await setupAirbyteSources(publicDNS, [zoomBody, salesforceSourceBody], destinationId, syncObj, workspaceId);
     })
     .catch(error => console.log(error));
 }

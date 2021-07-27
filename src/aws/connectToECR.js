@@ -13,7 +13,7 @@ const getAccountId = () => {
 const connectToECR = (directoryName, randomString) => {
   const region = getRegion();
   const accountId = getAccountId();
-  // LOGIN
+  LOGIN
   execSync(
     `aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin "${accountId}.dkr.ecr.${region}.amazonaws.com"`,
     { stdio: "inherit" }
@@ -62,7 +62,6 @@ const connectToECR = (directoryName, randomString) => {
   execSync(`aws ssm put-parameter --name "/grouparoo/stack-name" --value "${projectName}" --type String --overwrite`);
   //
 };
-
 
 module.exports = {
   connectToECR

@@ -15,8 +15,8 @@ async function setupAirbyteDestination(domainName, destinationConfigObject) {
   }
 }
 
-async function setupAirbyteSources(domainName, sourceConfigList, destinationId, syncObj) {
-  const operationId = await createOperation(domainName, "normalization");
+async function setupAirbyteSources(domainName, sourceConfigList, destinationId, syncObj, workspaceId) {
+  const operationId = await createOperation(domainName, workspaceId);
 
   for (const source of sourceConfigList) {
     const schema = await getSourceSchema(domainName, source.sourceDefinitionId, source.connectionConfiguration);
