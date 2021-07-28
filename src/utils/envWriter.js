@@ -21,9 +21,6 @@ const envWriter = () => {
   }
 }
 
-envWriter();
-
-
 module.exports = {
   envWriter
 }

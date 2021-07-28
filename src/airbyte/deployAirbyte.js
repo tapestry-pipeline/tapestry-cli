@@ -14,7 +14,7 @@ const deployAirbyte = async (projectName, randomString) => {
 
   console.log('Provisioning AWS cloud resources...');
   
-  const keyPairName = "tapestry-key-pair" + randomString;
+  const keyPairName = `${projectName}-key-pair-${randomString}`;
   createEC2KeyPair(keyPairName);
   createAirbyteStack(projectName, keyPairName, randomString);
 

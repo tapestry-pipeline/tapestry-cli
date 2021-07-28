@@ -14,7 +14,7 @@ const deployGrouparoo = (randomString, grouparooDeployRepoUrl, grouparooDirector
 
   execSync(`aws ssm put-parameter --name "/tapestry/mode" --value "${mode}" --type String --overwrite`);
 
-  execSync(`mv ${grouparooDirectory} 'grouparoo-config`);
+  execSync(`mv ${grouparooDirectory} grouparoo-config`);
 
   console.log("now getting ready for connecting to ECR...");
 

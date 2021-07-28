@@ -29,7 +29,7 @@ const buildSqlScript = (password) => {
     "begin;",
     "USE DATABASE TAPESTRY_DATABASE;",
     "USE SCHEMA DBT_TAPESTRY;",
-    "create table EMAIL_MODEL(EMAIL string, FNAME string, LNAME string);",
+    "create table if not exists EMAIL_MODEL(EMAIL string, FNAME string, LNAME string);",
     "commit;",
     "begin",
     "grant OWNERSHIP on table EMAIL_MODEL to role TAPESTRY_ROLE;",
