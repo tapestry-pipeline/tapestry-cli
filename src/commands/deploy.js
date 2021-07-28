@@ -10,7 +10,7 @@ const grouparooDirectory = "deploy-config-grouparoo";
 module.exports = async () => {
   const randomString = getRandomString();
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
-  const pathConfirmation = [{type: 'confirm', name: 'confirmPath', message: `Go to your Tapestry project folder, called ${projectName} for deployment to begin. Confirm when you are ready.`}];
+  const pathConfirmation = [{type: 'confirm', name: 'confirmPath', message: `Go to your Tapestry project's root folder, called ${projectName} for deployment to begin. Confirm when you are ready.`}];
 
   await inquirer
     .prompt(pathConfirmation)
@@ -21,4 +21,5 @@ module.exports = async () => {
         console.log("Deployment finished!");
       }
     })
+    .catch(error => console.log(error));
 };

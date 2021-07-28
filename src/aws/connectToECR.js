@@ -5,7 +5,7 @@ const { getRegion } = require("./getRegion.js");
 const { getAccountId } = require("./getAccountId.js");
 
 
-const connectToECR = (directoryName, randomString) => {
+const connectToECR = (randomString) => {
   const region = getRegion();
   const accountId = getAccountId();
   // LOGIN
@@ -17,7 +17,7 @@ const connectToECR = (directoryName, randomString) => {
   // switch context to run build command
   execSync(`docker context use default`);
   // BUILD
-  execSync(`docker build -t grouparoo ./${directoryName}`, { stdio: "inherit" });
+  execSync(`docker build -t grouparoo ./grouparoo-config`, { stdio: "inherit" });
 
   // CREATE REPO
   execSync(
@@ -34,8 +34,9 @@ const connectToECR = (directoryName, randomString) => {
   );
 
   // PUSH
+  const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
   execSync(
-    `docker push ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`,
+    `docker push ${imageUrl}`,
     { stdio: "inherit" }
   );
   console.log("pushing");
@@ -43,13 +44,13 @@ const connectToECR = (directoryName, randomString) => {
   console.log(
     `Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`
   );
-  execSync(`docker context create ecs myecscontext_${randomString}`, { stdio: "inherit" });
-  execSync(`docker context use myecscontext_${randomString}`);
-  const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
+  execSync(`docker context create ecs tapestryecs`, { stdio: "inherit" });
+  execSync(`docker context use tapestryecs`);
 
+  // yamlWriter(imageUrl);
   // writes docker-compose.yml for immediate use
   yamlWriter(imageUrl);
-  envWriter(directoryName);
+  envWriter();
   execSync(`docker compose up`, { stdio: "inherit" });
 
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
