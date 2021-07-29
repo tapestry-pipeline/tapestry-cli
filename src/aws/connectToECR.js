@@ -44,19 +44,18 @@ const connectToECR = (randomString) => {
   console.log(
     `Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter"`
   );
-  execSync(`docker context create ecs tapestryecs`, { stdio: "inherit" });
-  execSync(`docker context use tapestryecs`);
 
-  // yamlWriter(imageUrl);
+  const contextName = `tapestryecs-${randomString}`;
+  execSync(`docker context create ecs ${contextName}`, { stdio: "inherit" });
+  execSync(`docker context use ${contextName}`);
+
   // writes docker-compose.yml for immediate use
   yamlWriter(imageUrl);
   envWriter();
   execSync(`docker compose up`, { stdio: "inherit" });
 
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
-  // TODO - currently stores projectName as grouparoo stack name -> maybe we can rename it to make it more consistent with the other stack name's format?
   execSync(`aws ssm put-parameter --name "/grouparoo/stack-name" --value "${projectName}" --type String --overwrite`);
-  //
 };
 
 module.exports = {

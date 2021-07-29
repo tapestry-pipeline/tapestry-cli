@@ -1,20 +1,7 @@
 const axios = require("axios");
-// const axiosRetry = require('axios-retry');
 const { execSync } = require('child_process');
 
-// axiosRetry(axios, {
-//   retries: 3,
-//   retryDelay: (retryCount) => {
-//     console.log(`retry attempt: ${retryCount}`);
-//     return retryCount * 2000; // time interval between retries
-//   },
-//   retryCondition: (error) => {
-//     console.log('Workspace not found. Retrying request...')
-//     return error.response.status === 404;
-//   }
-// });
-
-
+// Old function changed due to Airbyte updating their api (7.29.21):
 // async function storeWorkspaceId(domainName) {
 //   return await axios
 //     .post(`${domainName}/api/v1/workspaces/get_by_slug`, { slug: "default" })
@@ -23,18 +10,6 @@ const { execSync } = require('child_process');
 //       execSync(`aws ssm put-parameter --name "/airbyte/workspace-id" --value "${data.workspaceId}" --type String --overwrite`);
 //     })
 //     .catch((error) => console.log(error));
-// }
-
-// async function getWorkspaceId(domainName) {
-//   return await axios
-//     .post(`${domainName}/api/v1/workspaces/workspaces/list`)
-//     .then((response) => {
-//       let data = response.data;
-//       let workspaceObject = data.workspaces[0];
-//       return workspaceObject.workspaceId
-//     })
-//     .catch((error) => console.log(error));
-    
 // }
 
 async function storeWorkspaceId(domainName) {

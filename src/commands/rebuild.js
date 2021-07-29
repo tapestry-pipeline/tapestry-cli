@@ -40,7 +40,7 @@ const runRebuild = () => {
   console.log("pushing");
   yamlWriter(imageUrl);
 
-  execSync(`docker context use tapestryecs`);
+  execSync(`docker context use tapestryecs`); // TODO - fix context name (store in params store and retrieve?)
   execSync(`docker compose up`, { stdio: "inherit" });
   
   const grouparooStackName = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/stack-name"').toString()).Parameter.Value;
