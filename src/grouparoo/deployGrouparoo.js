@@ -5,8 +5,12 @@ const deployGrouparoo = (randomString, grouparooDeployRepoUrl, grouparooDirector
   console.log("Now Grouparoo setup will begin...");
   execSync(`git clone ${grouparooDeployRepoUrl}`);
 
-
-  let mode = (grouparooDirectory === 'deploy-config-grouparoo') ? 'deploy' : 'kickstart'; 
+  let mode;
+  if (grouparooDirectory === 'deploy-config-grouparoo') {
+    mode = 'deploy';
+  } else {
+    mode = 'kickstart';
+  }
 
   execSync(`aws ssm put-parameter --name "/tapestry/mode" --value "${mode}" --type String --overwrite`);
 

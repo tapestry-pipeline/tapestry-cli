@@ -38,7 +38,6 @@
     "inquirer": "^8.1.2",
     "js-yaml": "^4.1.0",
     "snowflake-promise": "^4.5.0",
-    "spinnies": "^0.5.1",
     "sqlite3": "^5.0.2",
     "tapestry": "*"
   }

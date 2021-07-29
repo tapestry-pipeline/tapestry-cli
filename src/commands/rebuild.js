@@ -5,7 +5,7 @@ const { getAccountId } = require("../aws/getAccountId.js");
 const { yamlWriter } = require("../utils/yamlWriter.js");
 
 const launchConfig = () => {
-  exec('cd grouparoo-config && npm install && grouparoo config');
+  exec('cd grouparoo-config && grouparoo config');
 }
 
 const terminateConfig = () => {
