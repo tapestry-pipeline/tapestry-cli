@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-async function countSources(domainName, workspaceId) {
+async function countSources(domainName, workspaceId)  {
   return await axios
     .post(`${domainName}/api/v1/sources/list`, { workspaceId})
     .then((response) => {
@@ -13,6 +13,8 @@ async function countSources(domainName, workspaceId) {
     });
 }
 
+
+// export default countSources;
 module.exports = {
   countSources
 }

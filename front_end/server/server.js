@@ -5,7 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 // const getFromTable = require(`${__dirname}/../../src/aws/api/dynamoDB/getFromTable`);
-const countSources = require(`${__dirname}/../../src/airbyte/api/countSources.js`);
+const { countSources } = require(`${__dirname}/../../src/airbyte/api/countSources.js`);
 const app = express();
 const host = 'localhost';
 const port = 7777;
@@ -39,15 +39,16 @@ app.get('/api/airbyte/getcards', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
   const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
   const count = await countSources(dns, workspaceId); 
-  // const data = [ 
-  //   {name: "Sources", value: #}, 
+
+  const data = [ 
+    {name: "Sources", value: count}, 
   //   {name: "EC2 Instance State", value: running}, 
   //   {name: "EC2 Instance CPU Utilization", value: _%},  
   //   {name: "EC2 Status Check Failures", value: 0}
-  // ]
+  ]
     
   res.set('Content-Type', 'application/json');
-  res.send({name: "Sources", value: count});
+  res.send(data);
 }); 
 
 app.get('/api/airbyte/countsources', async(req, res) => {
