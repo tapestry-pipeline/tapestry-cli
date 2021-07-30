@@ -2,6 +2,7 @@ const Snowflake = require('snowflake-promise').Snowflake;
 const { getSnowflakeCredentials } = require('./getSnowflakeCredentials.js');
 const { buildSqlScript } = require('./buildSqlScript.js');
 const { execSync } = require('child_process');
+const log = require('../../utils/logger.js').logger
 
 async function createAirbyteWarehouse() {
   await getSnowflakeCredentials();
@@ -10,8 +11,9 @@ async function createAirbyteWarehouse() {
   const username = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-username" --with-decryption').toString()).Parameter.Value;
   const password = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-pass" --with-decryption').toString()).Parameter.Value;
  
-  console.log('Setting up Airbyte Warehouse in Snowflake...');
-  const snowflake = new Snowflake({ account, username, password }, { logSql: console.log });
+  log('Setting up Airbyte Warehouse in Snowflake...');
+  // const snowflake = new Snowflake({ account, username, password }, { logSql: console.log });
+  const snowflake = new Snowflake({ account, username, password });
 
   await snowflake.connect();
 

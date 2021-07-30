@@ -4,7 +4,7 @@ async function createConnectionObject(sourceId, destinationId, operationId, sche
   return {
     namespaceDefinition: "source",
     namespaceFormat: "${SOURCE_NAMESPACE}",
-    prefix: "TAP_CONN_",
+    prefix: "TAPESTRY_",
     sourceId: sourceId,
     destinationId: destinationId,
     operationIds: [operationId],

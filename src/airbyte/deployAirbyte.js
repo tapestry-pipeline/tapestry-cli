@@ -7,31 +7,30 @@ const { connectInstance } = require("../aws/connectInstance.js");
 const { registerTargets } = require("../aws/registerTargets");
 const { storePublicDNS } = require("../aws/storePublicDNS.js");
 const { setupSnowflakeDestination } = require("./setupConnections/setupSnowflakeDestination.js");
+const log = require('../utils/logger.js').logger;
 
 
 const deployAirbyte = async (projectName, randomString) => {
   await createAirbyteWarehouse();
 
-  console.log('Provisioning AWS cloud resources...');
+  log('Provisioning AWS cloud resources...');
   
   const keyPairName = `${projectName}-key-pair-${randomString}`;
   createEC2KeyPair(keyPairName);
   createAirbyteStack(projectName, keyPairName, randomString);
 
-  console.log('Installing Airbyte on EC2 instance...')
+  log('Installing Airbyte on EC2 instance...')
   connectInstance(keyPairName);
 
-  console.log('Registering target to target group...')
+  log('Registering target to target group...')
   registerTargets(keyPairName);
 
-  console.log('Launching Airbyte UI to enter login information...')
+  log('Launching Airbyte UI to enter login information...')
   storePublicDNS(projectName);
   const publicDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
-  launchPublicDNS(publicDNS);
+  await launchPublicDNS(publicDNS);
 
   await setupSnowflakeDestination(keyPairName, publicDNS, randomString);
-
-  console.log("Airbyte deployment is complete.");
 }
   module.exports = {
     deployAirbyte

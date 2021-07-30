@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const { execSync } = require('child_process');
+const chalk = require('chalk');
 
 const validateInput = async (input) => {
   if (input === '') {
@@ -9,13 +10,13 @@ const validateInput = async (input) => {
 }
 
 const getSnowflakeCredentials = async () => {
-  console.log('Now we need to get some information about your Snowflake credentials:');
+  console.log(`${chalk.bold.cyan('Now we need to get some information about your Snowflake credentials:')}`);
 
   const questions = [
     { type: 'input', name: 'snowHostname', message: 'Snowflake Account Hostname (e.g., "<hostname>.snowflakecomputing.com"):', validate: validateInput },
     { type: 'input', name: 'snowUsername', message: 'Snowflake Account Login Name:', validate: validateInput },
     { type: 'password', name: 'snowAcctPass', message: 'Snowflake Account Password:', validate: validateInput, mask: '*' },
-    { type: 'password', name: 'snowAbUserPass', message: 'Tapestry will create an TAPESTRY_WAREHOUSE and TAPESTRY_USER during setup. \n What password would you like to use for TAPESTRY_USER?', validate: validateInput, mask: '*' },
+    { type: 'password', name: 'snowAbUserPass', message: 'Tapestry will create a TAPESTRY_WAREHOUSE and TAPESTRY_USER during setup. \n What password would you like to use for TAPESTRY_USER?', validate: validateInput, mask: '*' },
   ];
 
   await inquirer

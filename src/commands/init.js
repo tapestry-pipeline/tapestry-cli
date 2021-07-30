@@ -1,15 +1,16 @@
 const inquirer = require('inquirer');
 const { execSync, exec } = require('child_process');
-const chalk = require('chalk');
 const process = require('process');
 const airbyteRepo = "https://github.com/tapestry-pipeline/airbyte.git";
+const log = require('../utils/logger.js').logger;
+const chalk = require('chalk');
 
 const questions = [
   { type: 'input', name: 'projectName', message: 'Project name:', default: 'tapestry-project' },
 ];
 
 const gatherInfo = async () => {
-  console.log('Please provide the following details:')
+  console.log(`${chalk.bold.cyan('Please provide the following details:')}`);
   await inquirer
     .prompt(questions)
     .then(async answers => {
@@ -19,12 +20,12 @@ const gatherInfo = async () => {
 }
 
 const provisionFolders = async () => {
-  console.log(`\uD83D\uDD53 ${chalk.bold.yellow('Provisioning folders...')}`);
+  log('Provisioning folders...');
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
   execSync(`mkdir ${projectName}`);
   process.chdir(`${projectName}`);
-  exec(`git clone ${airbyteRepo}`); // TODO - execSync solution for this?
-  console.log(`\u2705 ${chalk.bold.green('Folders provisioned!')}`);
+  exec(`git clone ${airbyteRepo}`); // TODO - execSync solution for this?\
+  log("New folders provisioned!");
 }
 
 module.exports = async () => {

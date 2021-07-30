@@ -1,4 +1,5 @@
 const { execSync } = require("child_process");
+const log = require('../utils/logger.js').logger
 
 const teardown = () => {
   // get stack names
@@ -6,28 +7,28 @@ const teardown = () => {
   const grouparooStackName = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/stack-name"').toString()).Parameter.Value;
 
   // delete stacks
-  console.log('Deleting Airbyte stack...');
+  log('Deleting Airbyte stack... (this will take approximately 2 min)');
   execSync(`aws cloudformation delete-stack --stack-name ${airbyteStackName}`);
   execSync(`aws cloudformation wait stack-delete-complete --stack-name ${airbyteStackName}`);
-  console.log('Airbyte stack deleted!');
+  log('Airbyte stack deleted!');
 
-  console.log('Deleting Grouparoo stack...');
+  log('Deleting Grouparoo stack... (this will take approximately 10 min)');
   execSync(`aws cloudformation delete-stack --stack-name ${grouparooStackName}`);
   execSync(`aws cloudformation wait stack-delete-complete --stack-name ${grouparooStackName}`);
-  console.log('Grouparoo stack deleted!');
+  log('Grouparoo stack deleted!');
 
   // remove ECR repo
-  console.log('Removing Grouparoo repository from ECR...');
+  log('Removing Grouparoo repository from ECR...');
   execSync('aws ecr delete-repository --repository-name grouparoo --force');
 
   // remove key-pair
-  console.log('Removing project key-pair...');
+  log('Removing project key-pair...');
   const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
   execSync(`aws ec2 delete-key-pair --key-name ${keyPairName}`);
 }
 
 module.exports = () => {
-  console.log('Teardown process initiated...');
+  log('Teardown process initiated...');
   teardown();
-  console.log('Teardown complete!');
+  log('Teardown complete!');
 }

@@ -1,9 +1,10 @@
 const { connectToECR } = require("../aws/connectToECR.js");
-const { execSync } = require('child_process');
+const { execSync, exec } = require('child_process');
+const chalk = require('chalk');
 
 const deployGrouparoo = (randomString, grouparooDeployRepoUrl, grouparooDirectory) => {
-  console.log("Now Grouparoo setup will begin...");
-  execSync(`git clone ${grouparooDeployRepoUrl}`);
+  console.log(`${chalk.bold.cyan("Now Grouparoo setup will begin...")}`);
+  exec(`git clone ${grouparooDeployRepoUrl}`); // TODO - possibly change to execSync
 
   let mode;
   if (grouparooDirectory === 'deploy-config-grouparoo') {
@@ -15,8 +16,6 @@ const deployGrouparoo = (randomString, grouparooDeployRepoUrl, grouparooDirector
   execSync(`aws ssm put-parameter --name "/tapestry/mode" --value "${mode}" --type String --overwrite`);
 
   execSync(`mv ${grouparooDirectory} grouparoo-config`);
-
-  console.log("now getting ready for connecting to ECR...");
 
   connectToECR(randomString);
 }

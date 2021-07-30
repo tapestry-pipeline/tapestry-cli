@@ -1,8 +1,9 @@
-const { execSync } = require('child_process');
+const chalk = require('chalk');
+const open = require('open');
 
-const launchPublicDNS = (publicDNS) => {
-  console.log(publicDNS);
-  execSync(`open ${publicDNS}`); //TODO - just for Mac
+const launchPublicDNS = async (publicDNS) => {
+  console.log(`${chalk.cyan(publicDNS)}`);
+  await open(publicDNS);
 }
 
 module.exports = {

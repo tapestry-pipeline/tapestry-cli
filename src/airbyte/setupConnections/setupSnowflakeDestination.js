@@ -5,6 +5,8 @@ const { setupAirbyteDestination } = require('./airbyteSetup.js');
 const { buildSnowflakeDestination } = require('../configObjects/buildSnowflakeDestination.js');
 const { getInstanceId } = require('../../aws/getInstanceId.js'); 
 const { getS3BucketCredentials } = require('../../aws/getS3BucketCredentials.js');
+const log = require('../../utils/logger.js').logger;
+const chalk = require('chalk');
 
 const setupSnowflakeDestination = async (keyPairName, publicDNS, randomString) => {
   const loginConfirmation = [{type: 'confirm', name: 'confirmAbLogin', message: 'Please enter your email in the browser and click "continue" to create your workspace. \n Be sure to "skip onboarding step"! Confirm when you are ready.'}];
@@ -13,9 +15,9 @@ const setupSnowflakeDestination = async (keyPairName, publicDNS, randomString) =
     .prompt(loginConfirmation)
     .then(async ({ confirmAbLogin }) => {
       if (confirmAbLogin) {
-        console.log("Thanks for creating your workspace!");
+        console.log(`${chalk.bold.cyan("Thanks for creating your workspace!")}`);
         
-        console.log("Setting up Snowflake as a destination in Airbyte...");
+        log("Setting up Snowflake as a destination in Airbyte... (this will take approximately 30 sec)");
         await storeWorkspaceId(publicDNS);
         
         const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;

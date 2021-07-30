@@ -1,6 +1,7 @@
 const axios = require("axios");
 const SALESFORCE_DEFINITION_ID = "2470e835-feaf-4db6-96f3-70fd645acc77"; 
 const { contactSchema } = require('../configObjects/ContactSchema.js');
+const log = require('../../utils/logger.js').logger;
 
 
 const filterSchemas = (streamArray, streamName) => {
@@ -12,10 +13,10 @@ const filterSchemas = (streamArray, streamName) => {
 async function getSourceSchema(domainName, sourceDefinitionId, connectionConfiguration) {
 
   if (sourceDefinitionId === SALESFORCE_DEFINITION_ID) {
-    console.log("Getting Salesforce schema...")
+    log("Getting Salesforce schema...")
     return [ contactSchema ]; 
   } else {
-    console.log("Getting Zoom schema...")
+    log("Getting Zoom schema...")
     let schemaName = "webinar_registrants";
     let obj = {
       sourceDefinitionId: sourceDefinitionId,

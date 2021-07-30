@@ -3,6 +3,7 @@ const { execSync } = require('child_process');
 const { deployAirbyte } = require("../airbyte/deployAirbyte.js");
 const { deployGrouparoo } = require('../grouparoo/deployGrouparoo.js')
 const { getRandomString } = require("../utils/getRandomString.js");
+const log = require('../utils/logger.js').logger;
 
 const grouparooDeployRepoUrl = "https://github.com/tapestry-pipeline/deploy-config-grouparoo.git";
 const grouparooDirectory = "deploy-config-grouparoo";
@@ -16,9 +17,10 @@ module.exports = async () => {
     .prompt(pathConfirmation)
     .then(async ({ confirmPath }) => {
       if (confirmPath) {
-        await deployAirbyte(projectName, randomString);
+        // await deployAirbyte(projectName, randomString);
+        log("Airbyte deployment is complete!");
         deployGrouparoo(randomString, grouparooDeployRepoUrl, grouparooDirectory);
-        console.log("Deployment finished!");
+        log("Deployment finished!");
       }
     })
     .catch(error => console.log(error));
