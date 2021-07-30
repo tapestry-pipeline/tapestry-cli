@@ -4,8 +4,8 @@ const { execSync } = require('child_process');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
-
+// const getFromTable = require(`${__dirname}/../../src/aws/api/dynamoDB/getFromTable`);
+const countSources = require(`${__dirname}/../../src/airbyte/api/countSources.js`);
 const app = express();
 const host = 'localhost';
 const port = 7777;
@@ -19,15 +19,58 @@ app.get('/api', (_, res) => {
   // res.sendFile(path.resolve(__dirname + '/../app/build/index.html'));
 });
 
-app.get('/api/airbyte', async (req, res) => {
-  const airbyteDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
-  const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
-  const [ [ instanceId ] ] = JSON.parse(execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${keyPairName}" --query "Reservations[*].Instances[*].InstanceId"`).toString());
-  const region = execSync(`aws configure get region`).toString().trim();
-  const airbyte = { airbyteDNS, keyPairName, instanceId, region };
+// app.get('/api/airbyte', async (req, res) => {
+//   const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
+//   const [ [ instanceId ] ] = JSON.parse(execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${keyPairName}" --query "Reservations[*].Instances[*].InstanceId"`).toString());
+//   const region = execSync(`aws configure get region`).toString().trim();
+//   const airbyte = { keyPairName, instanceId, region };
+//   res.set('Content-Type', 'application/json');
+//   res.send(airbyte);
+// });
+
+app.get('/api/airbyte/getdns', async(req, res) => {
+  const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
+  const data = { dns }; 
   res.set('Content-Type', 'application/json');
-  res.send(airbyte);
-});
+  res.send(data);
+}); 
+
+app.get('/api/airbyte/getcards', async(req, res) => {
+  const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
+  const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
+  const count = await countSources(dns, workspaceId); 
+  // const data = [ 
+  //   {name: "Sources", value: #}, 
+  //   {name: "EC2 Instance State", value: running}, 
+  //   {name: "EC2 Instance CPU Utilization", value: _%},  
+  //   {name: "EC2 Status Check Failures", value: 0}
+  // ]
+    
+  res.set('Content-Type', 'application/json');
+  res.send({name: "Sources", value: count});
+}); 
+
+app.get('/api/airbyte/countsources', async(req, res) => {
+  
+  const data = { dns, workspaceId }; 
+  res.set('Content-Type', 'application/json');
+  res.send(data);
+}); 
+
+app.get('/api/airbyte/cpu', async(req, res) => {
+  res.set('Content-Type', 'application/json');
+  res.send();
+}); 
+
+app.get('/api/airbyte/statuscheck', async(req, res) => {
+  res.set('Content-Type', 'application/json');
+  res.send();
+}); 
+
+app.get('/api/airbyte/getLogs', async(req, res) => {
+  // res.set('Content-Type', 'application/json'); ?? 
+  res.send();
+}); 
 
 // app.get('/traffic', async (req, res) => {
 //   const traffic = await getFromTable('TRAFFIC');
