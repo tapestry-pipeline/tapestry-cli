@@ -1,29 +1,33 @@
 #!/usr/bin/env node
 
+const { execSync } = require('child_process');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-// const getFromTable = require(`${__dirname}/../../src/aws/api/dynamoDB/getFromTable`);
-// const configDir = require('../../src/aws/utils/configDir');
-// require('dotenv').config({ path: `${configDir}/.env` });
+
+
 const app = express();
 const host = 'localhost';
 const port = 7777;
 
 app.use(cors());
 
-app.use(express.static(path.resolve(__dirname + '/../app/build/')));
+// app.use(express.static(path.resolve(__dirname + '/../app/build/')));
 
-app.get('/', (_, res) => {
-  res.sendFile(path.resolve(__dirname + '/../app/build/index.html'));
+app.get('/api', (_, res) => {
+  res.json({message: "Hello from the server!"})
+  // res.sendFile(path.resolve(__dirname + '/../app/build/index.html'));
 });
 
-// app.get('/events', async (req, res) => {
-//   const events = await getFromTable('EVENTS');
-//   events.forEach((event) => (event.ID = event.ID.split('_')[0]));
-//   res.set('Content-Type', 'application/json');
-//   res.send(events);
-// });
+app.get('/api/airbyte', async (req, res) => {
+  const airbyteDNS = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
+  const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
+  const [ [ instanceId ] ] = JSON.parse(execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${keyPairName}" --query "Reservations[*].Instances[*].InstanceId"`).toString());
+  const region = execSync(`aws configure get region`).toString().trim();
+  const airbyte = { airbyteDNS, keyPairName, instanceId, region };
+  res.set('Content-Type', 'application/json');
+  res.send(airbyte);
+});
 
 // app.get('/traffic', async (req, res) => {
 //   const traffic = await getFromTable('TRAFFIC');
