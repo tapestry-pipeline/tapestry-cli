@@ -4,8 +4,8 @@ const { execSync } = require('child_process');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-// const getFromTable = require(`${__dirname}/../../src/aws/api/dynamoDB/getFromTable`);
 const { countSources } = require(`${__dirname}/../../src/airbyte/api/countSources.js`);
+const { getInstanceId } = require(`${__dirname}/../../src/aws/getInstanceId.js`);
 const app = express();
 const host = 'localhost';
 const port = 7777;
@@ -20,7 +20,7 @@ app.get('/api', (_, res) => {
 });
 
 // app.get('/api/airbyte', async (req, res) => {
-//   const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
+//   
 //   const [ [ instanceId ] ] = JSON.parse(execSync(`aws ec2 describe-instances --filters "Name=key-name, Values=${keyPairName}" --query "Reservations[*].Instances[*].InstanceId"`).toString());
 //   const region = execSync(`aws configure get region`).toString().trim();
 //   const airbyte = { keyPairName, instanceId, region };
@@ -38,11 +38,22 @@ app.get('/api/airbyte/getdns', async(req, res) => {
 app.get('/api/airbyte/getcards', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
   const workspaceId = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/workspace-id"').toString()).Parameter.Value;
-  const count = await countSources(dns, workspaceId); 
+  // const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
+  // const instanceId = getInstanceId(keyPairName); 
+  const instanceId = 'i-0b1abf75ad0389ca3'; //TODO - make not hard-coded with code above
 
+  const count = await countSources(dns, workspaceId); 
+  const instanceData = JSON.parse(execSync(`aws ec2 describe-instance-status --instance-id ${instanceId}`).toString()).InstanceStatuses[0]
+  const state = instanceData.InstanceState.Name;
+  const instanceStatus = instanceData.InstanceStatus.Details[0].Status
+  const systemStatus = instanceData.SystemStatus.Details[0].Status 
+  
+// 
   const data = [ 
     {name: "Sources", value: count}, 
-  //   {name: "EC2 Instance State", value: running}, 
+    {name: "EC2 Instance State", value: state}, 
+    {name: "EC2 Instance Reachability", value: instanceStatus}, 
+    {name: "System Reachability", value: systemStatus }, 
   //   {name: "EC2 Instance CPU Utilization", value: _%},  
   //   {name: "EC2 Status Check Failures", value: 0}
   ]
