@@ -47,15 +47,20 @@ app.get('/api/airbyte/getcards', async(req, res) => {
   const state = instanceData.InstanceState.Name;
   const instanceStatus = instanceData.InstanceStatus.Details[0].Status
   const systemStatus = instanceData.SystemStatus.Details[0].Status 
-  
-// 
+  let current = new Date();
+  let minusOne = new Date(); 
+  minusOne = minusOne.setHours(current.getHours() - 1).toString();
+  current = current.toString();
+
+  const cpuUtilization = JSON.parse(execSync(`aws cloudwatch get-metric-statistics --metric-name CPUUtilization --start-time 2021-07-30T21:00:00 --end-time 2021-07-30T21:45:00 --period 120 --statistics Average --namespace AWS/EC2`).toString()); 
+   
+
   const data = [ 
     {name: "Sources", value: count}, 
     {name: "EC2 Instance State", value: state}, 
     {name: "EC2 Instance Reachability", value: instanceStatus}, 
     {name: "System Reachability", value: systemStatus }, 
-  //   {name: "EC2 Instance CPU Utilization", value: _%},  
-  //   {name: "EC2 Status Check Failures", value: 0}
+    {name: "EC2 Instance CPU Utilization", value: cpuUtilization }  
   ]
     
   res.set('Content-Type', 'application/json');
