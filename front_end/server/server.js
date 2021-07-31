@@ -12,6 +12,7 @@ const host = 'localhost';
 const port = 7777;
 
 app.use(cors());
+app.use(express.text({ type: "text/plain" }));
 
 // app.use(express.static(path.resolve(__dirname + '/../app/build/')));
 
@@ -53,24 +54,30 @@ app.get('/api/airbyte/getcards', async(req, res) => {
 
 app.get('/api/airbyte/cpu', async(req, res) => {
   let date = new Date(); 
-  let minusTwelve = new Date(); 
-  minusTwelve.setHours(date.getHours() - 12); 
+  let minusSix = new Date(); 
+  minusSix.setHours(date.getHours() - 6); 
   date = date.toISOString()
-  minusTwelve = minusTwelve.toISOString()
+  minusSix = minusSix.toISOString()
 
-  // This might be for all instances? How to get for specific instance? 
-  const cpuUtilization = JSON.parse(execSync(`aws cloudwatch get-metric-statistics --metric-name CPUUtilization --start-time ${minusTwelve} --end-time ${date} --period 900 --statistics Average --namespace AWS/EC2`).toString()); 
-
+  const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
+  const instanceId = getInstanceId(keyPairName); 
+  const cpuUtilization = JSON.parse(execSync(`aws cloudwatch get-metric-statistics --metric-name CPUUtilization --dimensions Name=InstanceId,Value=${instanceId} --start-time ${minusSix} --end-time ${date} --period 900 --statistics Average --namespace AWS/EC2`).toString()).Datapoints; 
+  
   res.set('Content-Type', 'application/json');
-  res.send();
+  res.send({ cpuUtilization });
 }); 
 
+
+function logParser() {
+
+}
 
 app.get('/api/airbyte/getlogs', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
 
   let data = await getLogs(dns);
   // console.log(data)
+  // res.set('Content-Type', 'text/plain');
   res.set('Content-Type', 'text/plain');
   res.send(data);
 }); 
