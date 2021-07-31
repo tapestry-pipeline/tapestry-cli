@@ -70,10 +70,9 @@ app.get('/api/airbyte/getlogs', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
 
   let data = await getLogs(dns);
-  console.log(data)
-  res.set('Content-Type', 'application/json');
+  // console.log(data)
+  res.set('Content-Type', 'text/plain');
   res.send(data);
-      
 }); 
 
 // app.get('/traffic', async (req, res) => {
