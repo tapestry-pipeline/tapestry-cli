@@ -6,7 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const { countSources } = require(`${__dirname}/../../src/airbyte/api/countSources.js`);
 const { getInstanceId } = require(`${__dirname}/../../src/aws/getInstanceId.js`);
-const {getLogs} = require(`${__dirname}/../../src/airbyte/api/getLogs.js`); 
+const { getAirbyteLogs } = require(`${__dirname}/../../src/airbyte/api/getAirbyteLogs.js`); 
 const app = express();
 const host = 'localhost';
 const port = 7777;
@@ -64,7 +64,7 @@ app.get('/api/airbyte/cpu', async(req, res) => {
   const cpuUtilization = JSON.parse(execSync(`aws cloudwatch get-metric-statistics --metric-name CPUUtilization --dimensions Name=InstanceId,Value=${instanceId} --start-time ${minusSix} --end-time ${date} --period 900 --statistics Average --namespace AWS/EC2`).toString()).Datapoints; 
   
   res.set('Content-Type', 'application/json');
-  res.send({ cpuUtilization });
+  res.send(cpuUtilization);
 }); 
 
 
@@ -75,7 +75,7 @@ function logParser() {
 app.get('/api/airbyte/getlogs', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
 
-  let data = await getLogs(dns);
+  let data = await getAirbyteLogs(dns);
   // console.log(data)
   // res.set('Content-Type', 'text/plain');
   res.set('Content-Type', 'text/plain');
