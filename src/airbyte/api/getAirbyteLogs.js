@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const getLogs = async (domainName) => {
+const getAirbyteLogs = async (domainName) => {
   return await axios.post(`${domainName}/api/v1/logs/get`, { logType: "scheduler" })
   .then(({data}) => {
     return data
