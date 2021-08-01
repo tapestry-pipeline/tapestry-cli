@@ -4,10 +4,13 @@ const process = require('process');
 const airbyteRepo = "https://github.com/tapestry-pipeline/airbyte.git";
 const log = require('../utils/logger.js').logger;
 const chalk = require('chalk');
+const tapestryAscii = require('../utils/tapestryAscii.js');
 
 const questions = [
   { type: 'input', name: 'projectName', message: 'Project name:', default: 'tapestry-project' },
 ];
+
+tapestryAscii();
 
 const gatherInfo = async () => {
   console.log(`${chalk.bold.cyan('Please provide the following details:')}`);
