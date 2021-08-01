@@ -1,6 +1,7 @@
 const { connectToECR } = require("../aws/connectToECR.js");
 const { execSync, exec } = require('child_process');
 const chalk = require('chalk');
+const { storeGrouparooPublicDNS } = require("../aws/storePublicDNS.js");
 
 const deployGrouparoo = (randomString, grouparooDeployRepoUrl, grouparooDirectory) => {
   console.log(`${chalk.bold.cyan("Now Grouparoo setup will begin...")}`);
@@ -18,6 +19,9 @@ const deployGrouparoo = (randomString, grouparooDeployRepoUrl, grouparooDirector
   execSync(`mv ${grouparooDirectory} grouparoo-config`);
 
   connectToECR(randomString);
+
+  const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+  storeGrouparooPublicDNS(projectName);
 }
 
 module.exports = {

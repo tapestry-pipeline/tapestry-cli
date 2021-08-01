@@ -10,8 +10,6 @@ const questions = [
   { type: 'input', name: 'projectName', message: 'Project name:', default: 'tapestry-project' },
 ];
 
-tapestryAscii();
-
 const gatherInfo = async () => {
   console.log(`${chalk.bold.cyan('Please provide the following details:')}`);
   await inquirer
@@ -29,9 +27,11 @@ const provisionFolders = async () => {
   process.chdir(`${projectName}`);
   exec(`git clone ${airbyteRepo}`); // TODO - execSync solution for this?\
   log("New folders provisioned!");
+  console.log(`${chalk.bold.cyan(`Now please change to your Tapestry project's root folder, called ${projectName}!`)}`);
 }
 
 module.exports = async () => {
+  tapestryAscii();
   await gatherInfo();
   await provisionFolders();
 }

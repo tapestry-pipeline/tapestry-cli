@@ -55,7 +55,7 @@ const kickstartAirbyte = async (projectName, randomString) => {
   ];
 
   const mailchimpQuestions = [
-    { type: 'input', name: 'apiKey', message: 'Mailchimp Destination - API Key', validate: validateInput },
+    { type: 'input', name: 'apiKey', message: 'Mailchimp Destination - API Key:', validate: validateInput },
     { type: 'input', name: 'listId', message: 'Mailchimp Destination - Audience ID:', validate: validateInput },
   ]; 
 
