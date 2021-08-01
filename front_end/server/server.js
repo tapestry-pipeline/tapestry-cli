@@ -7,6 +7,7 @@ const path = require('path');
 const { countSources } = require(`${__dirname}/../../src/airbyte/api/countSources.js`);
 const { getInstanceId } = require(`${__dirname}/../../src/aws/getInstanceId.js`);
 const { getAirbyteLogs } = require(`${__dirname}/../../src/airbyte/api/getAirbyteLogs.js`); 
+const { getTables } = require(`${__dirname}/../../src/airbyte/warehouseSetup/getTables.js`); 
 const app = express();
 const host = 'localhost';
 const port = 7777;
@@ -75,14 +76,22 @@ app.get('/api/airbyte/getlogs', async(req, res) => {
   res.send(data);
 });
 
-app.get('/api/grouparoo/getdns', async(req, res) => {
-  const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
-  const arn = JSON.parse(execSync(`aws cloudformation describe-stack-resources --stack-name ${projectName} --logical-resource-id LoadBalancer --query "StackResources[0].PhysicalResourceId"`));
-  const dns = JSON.parse(execSync(`aws elbv2 describe-load-balancers --load-balancer-arns ${arn} --query "LoadBalancers[0].DNSName"`));
-  const data = { dns };
+// app.get('/api/grouparoo/getdns', async(req, res) => {
+//   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+//   const arn = JSON.parse(execSync(`aws cloudformation describe-stack-resources --stack-name ${projectName} --logical-resource-id LoadBalancer --query "StackResources[0].PhysicalResourceId"`));
+//   const dns = JSON.parse(execSync(`aws elbv2 describe-load-balancers --load-balancer-arns ${arn} --query "LoadBalancers[0].DNSName"`));
+//   const data = { dns };
+//   res.set('Content-Type', 'application/json');
+//   res.send(data);
+// });
+
+app.get('/api/snowflake/gettables', async(req, res) => {
+  const sourceTables = await getTables('TAPESTRY_SCHEMA'); 
+  const transformedTables = await getTables('DBT_TAPESTRY'); 
+  const data = { sourceTables, transformedTables }; 
   res.set('Content-Type', 'application/json');
   res.send(data);
-});
+}); 
 
 app.listen(port, host, () => {
   console.log(`\nYour Tapestry Dashboard is now available at: http://${host}:${port}.`);
