@@ -4,7 +4,7 @@ const chalk = require('chalk');
 
 const deployGrouparoo = (randomString, grouparooDeployRepoUrl, grouparooDirectory) => {
   console.log(`${chalk.bold.cyan("Now Grouparoo setup will begin...")}`);
-  exec(`git clone ${grouparooDeployRepoUrl}`); // TODO - possibly change to execSync
+  exec(`git clone -b apikey ${grouparooDeployRepoUrl}`); // TODO - possibly change to execSync
 
   let mode;
   if (grouparooDirectory === 'deploy-config-grouparoo') {
