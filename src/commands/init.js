@@ -5,11 +5,12 @@ const process = require('process');
 const airbyteRepo = "https://github.com/tapestry-pipeline/airbyte.git";
 const tapestryAscii = require('../utils/tapestryAscii.js');
 
-
 const questions = [
   { type: 'input', name: 'projectName', message: 'Project name:', default: 'tapestry-project' },
 ];
+
 tapestryAscii();
+
 const gatherInfo = async () => {
   console.log('Please provide the following details:')
   await inquirer
