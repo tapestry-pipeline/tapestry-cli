@@ -67,39 +67,22 @@ app.get('/api/airbyte/cpu', async(req, res) => {
   res.send(cpuUtilization);
 }); 
 
-
-function logParser() {
-
-}
-
 app.get('/api/airbyte/getlogs', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
 
   let data = await getAirbyteLogs(dns);
-  // console.log(data)
-  // res.set('Content-Type', 'text/plain');
   res.set('Content-Type', 'text/plain');
   res.send(data);
-}); 
+});
 
-// app.get('/traffic', async (req, res) => {
-//   const traffic = await getFromTable('TRAFFIC');
-//   res.set('Content-Type', 'application/json');
-//   res.send(traffic);
-// });
-
-// app.get('/endpoints', async (req, res) => {
-//   const endpoints = await getFromTable('SERVICES_CONFIG');
-//   res.set('Content-Type', 'application/json');
-//   res.send(endpoints);
-// });
-
-// app.get('/subdomain', (req, res) => {
-//   res.set('Content-Type', 'application/json');
-//   res.send(
-//     JSON.stringify('https://' + process.env.AWS_DOMAIN_NAME + '/service?id=')
-//   );
-// });
+app.get('/api/grouparoo/getdns', async(req, res) => {
+  const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+  const arn = JSON.parse(execSync(`aws cloudformation describe-stack-resources --stack-name ${projectName} --logical-resource-id LoadBalancer --query "StackResources[0].PhysicalResourceId"`));
+  const dns = JSON.parse(execSync(`aws elbv2 describe-load-balancers --load-balancer-arns ${arn} --query "LoadBalancers[0].DNSName"`));
+  const data = { dns };
+  res.set('Content-Type', 'application/json');
+  res.send(data);
+});
 
 app.listen(port, host, () => {
   console.log(`\nYour Tapestry Dashboard is now available at: http://${host}:${port}.`);
