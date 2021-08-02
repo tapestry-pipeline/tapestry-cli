@@ -22,6 +22,8 @@ const deployGrouparoo = (randomString, grouparooDeployRepoUrl, grouparooDirector
 
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
   storeGrouparooPublicDNS(projectName);
+
+  execSync(`aws ecs update-cluster-settings --cluster ${projectName} --settings name=containerInsights,value=enabled`);
 }
 
 module.exports = {

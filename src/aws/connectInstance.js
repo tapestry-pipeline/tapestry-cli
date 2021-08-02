@@ -10,7 +10,7 @@ const connectInstance = (keyPairName) => {
   const instanceId = getInstanceId(keyPairName);
   log('Waiting for "okay" status from Airbyte EC2 instance... (this will take approximately 2 min)');
   execSync(`aws ec2 wait instance-status-ok --instance-ids ${instanceId}`);
-  execSync(`aws ec2 monitor-instances --instance-ids ${instanceId}`) 
+  execSync(`aws ec2 monitor-instances --instance-ids ${instanceId}`);
   
   log('Airbyte EC2 instance now running!');
 }

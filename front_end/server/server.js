@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
+const { execSync, exec } = require('child_process');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -86,9 +86,6 @@ app.get('/api/grouparoo/getlogs', async(req, res) => {
   res.send(data);
 });
 
-
-
-
 app.get('/api/grouparoo/getdns', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/public-dns"').toString()).Parameter.Value;
   const data = { dns };
@@ -96,29 +93,18 @@ app.get('/api/grouparoo/getdns', async(req, res) => {
   res.send(data);
 });
 
-// cluster name is same as the project name
-// status of services. 
-// health monitoring -cpu, memory utilization
-// healthy services
-  // cluster status - healthy/non-healthy
-// task status
-// cpu utilization each service
-// task status
-
 app.get('/api/grouparoo/cpu', async(req, res) => {
-  let date = new Date(); 
+  let date = new Date();
   let minusSix = new Date(); 
   minusSix.setHours(date.getHours() - 6); 
   date = date.toISOString()
   minusSix = minusSix.toISOString()
 
-  // const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
-  // const instanceId = getInstanceId(keyPairName); 
-  // const cpuUtilization = JSON.parse(execSync(`aws cloudwatch get-metric-statistics --metric-name CPUUtilization --dimensions Name=InstanceId,Value=${instanceId} --start-time ${minusSix} --end-time ${date} --period 900 --statistics Average --namespace AWS/EC2`).toString()).Datapoints; 
+  const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+  const cpuUtilization = JSON.parse(execSync(`aws cloudwatch get-metric-statistics --metric-name CpuUtilized --dimensions Name=ClusterName,Value=${projectName} --start-time ${minusSix} --end-time ${date} --period 900 --statistics Average --namespace ECS/ContainerInsights`).toString()).Datapoints;
   
-  // res.set('Content-Type', 'application/json');
-  // res.send(cpuUtilization);
-
+  res.set('Content-Type', 'application/json');
+  res.send(cpuUtilization);
 })
 
 
@@ -128,7 +114,8 @@ app.get('/api/grouparoo/cpu', async(req, res) => {
 app.get('/api/grouparoo/getcards', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/public-dns"').toString()).Parameter.Value;
   // const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
-  // const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/public-dns"').toString()).Parameter.Value;
+  const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+  const clusterInfo = JSON.parse(execSync(`aws ecs describe-clusters --cluster ${projectName} --query "clusters[0]"`));
   // const instanceId = getInstanceId(keyPairName);
 
   const count = await getGrouparooDestinations(dns, apiKey); 
@@ -139,15 +126,15 @@ app.get('/api/grouparoo/getcards', async(req, res) => {
 
   
   const data = [ 
-    {name: "Destinations", value: count}, 
-    // {name: "EC2 Instance State", value: state}, 
-    // {name: "EC2 Instance Reachability", value: instanceStatus}, 
-    // {name: "System Reachability", value: systemStatus }
+    {name: "Destinations", value: count},
+    {name: "Cluster Status", value: clusterInfo.status}, 
+    {name: "Active Services Count", value: clusterInfo.activeServicesCount}, 
+    {name: "Running Tasks Count", value: clusterInfo.runningTasksCount},
   ]
     
   res.set('Content-Type', 'application/json');
   res.send(data);
-}); 
+});
 
 app.get('/api/snowflake/gettables', async(req, res) => {
   const sourceTables = await getTables('TAPESTRY_SCHEMA'); 
