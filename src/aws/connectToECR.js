@@ -15,6 +15,8 @@ const connectToECR = (randomString) => {
   // LOGIN
   execSync(`aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin "${accountId}.dkr.ecr.${region}.amazonaws.com"`);
 
+  // aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin "392072328816.dkr.ecr.us-east-2.amazonaws.com"
+
   // switch context to run build command
   execSync(`docker context use default`);
   // BUILD

@@ -2,7 +2,6 @@
 
 const { program } = require('commander');
 
-// command imports
 const deploy = require('../src/commands/deploy');
 const init = require('../src/commands/init');
 const kickstart = require('../src/commands/kickstart');
@@ -40,4 +39,3 @@ program
   .action(rebuild)
 
 program.parse(process.argv);
-

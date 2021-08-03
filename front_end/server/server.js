@@ -73,15 +73,15 @@ app.get('/api/airbyte/cpu', async(req, res) => {
 
 app.get('/api/airbyte/getlogs', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
-  let data = await getAirbyteLogs(dns);
+  const data = await getAirbyteLogs(dns);
   res.set('Content-Type', 'text/plain');
   res.send(data);
 });
 
-const apiKey = "7e64b77f47ca4aa3911bcad16520c8f8"
 app.get('/api/grouparoo/getlogs', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/public-dns"').toString()).Parameter.Value;
-  let data = await getGrouparooLogs(dns, apiKey);
+  const apiKey = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/api-key"').toString()).Parameter.Value;
+  const data = await getGrouparooLogs(dns, apiKey);
   res.set('Content-Type', 'application/json');
   res.send(data);
 });
@@ -107,24 +107,14 @@ app.get('/api/grouparoo/cpu', async(req, res) => {
   res.send(cpuUtilization);
 })
 
-
-// TODO - grab right grouparoo data
-// aws ecs describe-clusters --clusters test-project
-
 app.get('/api/grouparoo/getcards', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/public-dns"').toString()).Parameter.Value;
-  // const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
+  const apiKey = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/api-key"').toString()).Parameter.Value;
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
   const clusterInfo = JSON.parse(execSync(`aws ecs describe-clusters --cluster ${projectName} --query "clusters[0]"`));
-  // const instanceId = getInstanceId(keyPairName);
 
-  const count = await getGrouparooDestinations(dns, apiKey); 
-  // const instanceData = JSON.parse(execSync(`aws ec2 describe-instance-status --instance-id ${instanceId}`).toString()).InstanceStatuses[0]
-  // const state = instanceData.InstanceState.Name;
-  // const instanceStatus = instanceData.InstanceStatus.Details[0].Status
-  // const systemStatus = instanceData.SystemStatus.Details[0].Status 
+  const count = await getGrouparooDestinations(dns, apiKey);
 
-  
   const data = [ 
     {name: "Destinations", value: count},
     {name: "Cluster Status", value: clusterInfo.status}, 

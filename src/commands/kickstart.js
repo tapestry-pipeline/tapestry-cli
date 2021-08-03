@@ -21,7 +21,7 @@ module.exports = async () => {
       if (confirmPath) {
         await kickstartAirbyte(projectName, randomString);
         log("Airbyte deployment is complete!");
-        deployGrouparoo(randomString, grouparooKickstartRepoUrl, grouparooDirectory);
+        await deployGrouparoo(randomString, grouparooKickstartRepoUrl, grouparooDirectory);
         log("Deployment finished!");
       }
     })

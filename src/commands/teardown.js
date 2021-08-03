@@ -22,6 +22,7 @@ const teardown = () => {
   execSync('aws ecr delete-repository --repository-name grouparoo --force');
 
   // remove key-pair
+  // TODO - Only removes key-pair for airbyte (so do we remove any at all?)
   log('Removing project key-pair...');
   const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
   execSync(`aws ec2 delete-key-pair --key-name ${keyPairName}`);

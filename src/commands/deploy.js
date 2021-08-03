@@ -17,9 +17,9 @@ module.exports = async () => {
     .prompt(pathConfirmation)
     .then(async ({ confirmPath }) => {
       if (confirmPath) {
-        // await deployAirbyte(projectName, randomString);
+        await deployAirbyte(projectName, randomString);
         log("Airbyte deployment is complete!");
-        deployGrouparoo(randomString, grouparooDeployRepoUrl, grouparooDirectory);
+        await deployGrouparoo(randomString, grouparooDeployRepoUrl, grouparooDirectory);
         log("Deployment finished!");
       }
     })
