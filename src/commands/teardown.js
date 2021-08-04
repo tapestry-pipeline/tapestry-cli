@@ -1,4 +1,5 @@
 const { execSync } = require("child_process");
+const inquirer = require('inquirer');
 const log = require('../utils/logger.js').logger
 
 const teardown = () => {
@@ -22,14 +23,28 @@ const teardown = () => {
   execSync('aws ecr delete-repository --repository-name grouparoo --force');
 
   // remove key-pair
-  // TODO - Only removes key-pair for airbyte (so do we remove any at all?)
   log('Removing project key-pair...');
   const keyPairName = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/key-pair-name"').toString()).Parameter.Value;
   execSync(`aws ec2 delete-key-pair --key-name ${keyPairName}`);
 }
 
-module.exports = () => {
-  log('Teardown process initiated...');
-  teardown();
-  log('Teardown complete!');
+module.exports = async () => {
+  const confirmTeardown = [
+    {
+      type: 'confirm',
+      name: 'confirmation',
+      message: 'WARNING: This will permanently delete all of your Tapestry AWS resources.\n' +
+               'Are you sure you would like to continue?',
+    },
+  ];
+
+  await inquirer
+    .prompt(confirmTeardown)
+    .then(({confirmation}) => {
+      if (confirmation) {
+        log('Teardown process initiated...');
+        teardown();
+        log('Teardown complete!');
+      }
+    });
 }

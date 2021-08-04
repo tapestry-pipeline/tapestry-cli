@@ -46,7 +46,7 @@ const connectToECR = (randomString) => {
 
   console.log(`${chalk.bold.cyan(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter":`)}`);
 
-  const contextName = `tapestryecs-${randomString}`;
+  const contextName = `tapestry-ecs-${randomString}`;
   execSync(`docker context create ecs ${contextName}`, { stdio: "inherit" });
   execSync(`docker context use ${contextName}`);
 
@@ -57,7 +57,7 @@ const connectToECR = (randomString) => {
   log('Writing local .env file...');
   envWriter();
 
-  log('Deploying Grouparoo image on ECS... (this will take approximately 6 min)');
+  log('Deploying Grouparoo image on ECS... (this will take approximately 5-10 min)');
   execSync(`docker compose up &> .ecsLogs`);
   log("Grouparoo image deployed on ECS!");
 

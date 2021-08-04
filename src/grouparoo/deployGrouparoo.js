@@ -43,8 +43,8 @@ const deployGrouparoo = async (randomString, grouparooDeployRepoUrl, grouparooDi
       name: 'apiKey',
       message: 'Please sign in to your Grouparoo application by creating a team.\n' +
                'Then locate your "tapestry" API key (found under "Platforms") and enter it here:',
-      validate: validateInput
-    },
+      validate: validateInput,
+    }
   ];
 
   await inquirer
