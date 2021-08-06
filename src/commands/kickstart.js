@@ -3,6 +3,7 @@ const inquirer = require('inquirer');
 const { getRandomString } = require("../utils/getRandomString.js");
 const { kickstartAirbyte } = require("../airbyte/kickstartAirbyte");
 const { deployGrouparoo } = require("../grouparoo/deployGrouparoo");
+const startServer = require('./start-server');
 const log = require('../utils/logger.js').logger;
 
 const grouparooKickstartRepoUrl = "https://github.com/tapestry-pipeline/grouparoo-config-kickstart.git";
@@ -23,6 +24,8 @@ module.exports = async () => {
         log("Airbyte deployment is complete!");
         await deployGrouparoo(randomString, grouparooKickstartRepoUrl, grouparooDirectory);
         log("Deployment finished!");
+        log("Launching Tapestry UI...");
+        startServer();
       }
     })
     .catch(error => console.log(error));

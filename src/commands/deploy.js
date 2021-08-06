@@ -21,6 +21,8 @@ module.exports = async () => {
         log("Airbyte deployment is complete!");
         await deployGrouparoo(randomString, grouparooDeployRepoUrl, grouparooDirectory);
         log("Deployment finished!");
+        log("Launching Tapestry UI...");
+        startServer();
       }
     })
     .catch(error => console.log(error));

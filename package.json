@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "bin": {
-    "tapestry": "./bin/tapestry-cli.js"
+    "tapestry": "./bin/tapestry-cli.js",
+    "start_server": "./front_end/server/server.js"
   },
   "directories": {
     "test": "test"

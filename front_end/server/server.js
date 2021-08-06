@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync, exec } = require('child_process');
+const { execSync } = require('child_process');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -18,12 +18,7 @@ const port = 7777;
 app.use(cors());
 app.use(express.text({ type: "text/plain" }));
 
-// app.use(express.static(path.resolve(__dirname + '/../app/build/')));
-
-app.get('/api', (_, res) => {
-  res.json({message: "Hello from the server!"})
-  // res.sendFile(path.resolve(__dirname + '/../app/build/index.html'));
-});
+app.use(express.static(path.resolve(__dirname + '/../app/build/')));
 
 app.get('/api/airbyte/getdns', async(req, res) => {
   const dns = JSON.parse(execSync('aws ssm get-parameter --name "/airbyte/public-dns"').toString()).Parameter.Value;
@@ -54,7 +49,7 @@ app.get('/api/airbyte/getcards', async(req, res) => {
     
   res.set('Content-Type', 'application/json');
   res.send(data);
-}); 
+});
 
 app.get('/api/airbyte/cpu', async(req, res) => {
   let date = new Date(); 
@@ -146,9 +141,13 @@ app.get('/api/snowflake/gethistory', async(req, res) => {
   const data = await getQueryHistory();  
   res.set('Content-Type', 'application/json');
   res.send(data);
-}); 
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../app/build', 'index.html'));
+});
 
 app.listen(port, host, () => {
-  console.log(`\nYour Tapestry Dashboard is now available at: http://${host}:${port}.`);
-  console.log('Control + C to quit.');
+  console.log(`\nYour Tapestry Dashboard is now available at: http://${host}:${port}\n` +
+              'Control + C to quit.');
 });

@@ -7,6 +7,7 @@ const init = require('../src/commands/init');
 const kickstart = require('../src/commands/kickstart');
 const teardown = require('../src/commands/teardown');
 const rebuild = require('../src/commands/rebuild');
+const startServer = require('../src/commands/start-server');
 
 program
   .command('deploy')
@@ -37,5 +38,11 @@ program
   .alias("r")
   .description("Rebuild grouparoo image and push it to AWS Elastic Container Repository")
   .action(rebuild)
+
+program
+  .command("start-server")
+  .alias("st")
+  .description("Launch server for Tapestry UI")
+  .action(startServer)
 
 program.parse(process.argv);

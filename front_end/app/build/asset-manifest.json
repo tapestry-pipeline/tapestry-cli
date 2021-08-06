@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/static/css/main.0283f008.chunk.css",
-    "main.js": "/static/js/main.2ed09638.chunk.js",
-    "main.js.map": "/static/js/main.2ed09638.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.738485fa.js",
-    "runtime-main.js.map": "/static/js/runtime-main.738485fa.js.map",
-    "static/js/2.00cb6a2c.chunk.js": "/static/js/2.00cb6a2c.chunk.js",
-    "static/js/2.00cb6a2c.chunk.js.map": "/static/js/2.00cb6a2c.chunk.js.map",
-    "static/js/3.a046dae6.chunk.js": "/static/js/3.a046dae6.chunk.js",
-    "static/js/3.a046dae6.chunk.js.map": "/static/js/3.a046dae6.chunk.js.map",
+    "main.css": "/static/css/main.f8d9f7ca.chunk.css",
+    "main.js": "/static/js/main.1ded5ad8.chunk.js",
+    "main.js.map": "/static/js/main.1ded5ad8.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.24e23242.js",
+    "runtime-main.js.map": "/static/js/runtime-main.24e23242.js.map",
+    "static/js/2.0515d942.chunk.js": "/static/js/2.0515d942.chunk.js",
+    "static/js/2.0515d942.chunk.js.map": "/static/js/2.0515d942.chunk.js.map",
+    "static/js/3.98794c9b.chunk.js": "/static/js/3.98794c9b.chunk.js",
+    "static/js/3.98794c9b.chunk.js.map": "/static/js/3.98794c9b.chunk.js.map",
     "index.html": "/index.html",
-    "static/css/main.0283f008.chunk.css.map": "/static/css/main.0283f008.chunk.css.map",
-    "static/js/2.00cb6a2c.chunk.js.LICENSE.txt": "/static/js/2.00cb6a2c.chunk.js.LICENSE.txt",
+    "static/css/main.f8d9f7ca.chunk.css.map": "/static/css/main.f8d9f7ca.chunk.css.map",
+    "static/js/2.0515d942.chunk.js.LICENSE.txt": "/static/js/2.0515d942.chunk.js.LICENSE.txt",
     "static/media/airbyte.ee10a586.png": "/static/media/airbyte.ee10a586.png",
-    "static/media/check.cbe2f4a1.jpeg": "/static/media/check.cbe2f4a1.jpeg",
-    "static/media/cylinder.0ad4fd1e.png": "/static/media/cylinder.0ad4fd1e.png"
+    "static/media/pipeline_no_words.22f1c796.png": "/static/media/pipeline_no_words.22f1c796.png",
+    "static/media/tapestry_logo_color.c2bd66fd.png": "/static/media/tapestry_logo_color.c2bd66fd.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.738485fa.js",
-    "static/js/2.00cb6a2c.chunk.js",
-    "static/css/main.0283f008.chunk.css",
-    "static/js/main.2ed09638.chunk.js"
+    "static/js/runtime-main.24e23242.js",
+    "static/js/2.0515d942.chunk.js",
+    "static/css/main.f8d9f7ca.chunk.css",
+    "static/js/main.1ded5ad8.chunk.js"
   ]
 }
