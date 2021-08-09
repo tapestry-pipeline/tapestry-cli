@@ -3,6 +3,7 @@ const { execSync } = require('child_process');
 const { deployAirbyte } = require("../airbyte/deployAirbyte.js");
 const { deployGrouparoo } = require('../grouparoo/deployGrouparoo.js')
 const { getRandomString } = require("../utils/getRandomString.js");
+const startServer = require('./start-server');
 const log = require('../utils/logger.js').logger;
 
 const grouparooDeployRepoUrl = "https://github.com/tapestry-pipeline/deploy-config-grouparoo.git";

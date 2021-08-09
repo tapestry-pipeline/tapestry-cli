@@ -1,7 +1,7 @@
 {
-  "name": "tapestry-cli",
+  "name": "tapestry-pipeline",
   "version": "1.0.0",
-  "description": "",
+  "description": "A command line application for deploying a user data pipeline with a reverse-ETL component on AWS.",
   "bin": {
     "tapestry": "./bin/tapestry-cli.js",
     "start_server": "./front_end/server/server.js"
@@ -44,7 +44,6 @@
     "js-yaml": "^4.1.0",
     "open": "^7.4.2",
     "snowflake-promise": "^4.5.0",
-    "sqlite3": "^5.0.2",
-    "tapestry": "*"
+    "sqlite3": "^5.0.2"
   }
 }

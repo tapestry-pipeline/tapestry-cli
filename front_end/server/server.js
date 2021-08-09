@@ -124,7 +124,7 @@ app.get('/api/grouparoo/getcards', async(req, res) => {
 
 app.get('/api/snowflake/getdns', async(req, res) => {
   const hostName = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-hostname" --with-decryption').toString()).Parameter.Value;
-  const data = {dns:`https://${hostName}.snowflakecomputing.com`}
+  const data = { dns:`https://${hostName}.snowflakecomputing.com` };
   res.set('Content-Type', 'application/json');
   res.send(data);
 });
