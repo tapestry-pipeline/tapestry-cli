@@ -121,13 +121,13 @@ app.get('/api/grouparoo/getcards', async(req, res) => {
   res.send(data);
 });
 
-
 app.get('/api/snowflake/getdns', async(req, res) => {
   const hostName = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-hostname" --with-decryption').toString()).Parameter.Value;
-  const data = {dns:`https://${hostName}.snowflakecomputing.com`}
+  const data = `https://${hostName}.snowflakecomputing.com`
   res.set('Content-Type', 'application/json');
   res.send(data);
 });
+
 
 app.get('/api/snowflake/gettables', async(req, res) => {
   const sourceTables = await getTables('TAPESTRY_SCHEMA'); 
