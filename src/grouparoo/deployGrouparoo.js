@@ -14,7 +14,7 @@ const validateInput = async (input) => {
 
 const deployGrouparoo = async (randomString, grouparooDeployRepoUrl, grouparooDirectory) => {
   console.log(`${chalk.bold.cyan("Now Grouparoo setup will begin...")}`);
-  exec(`git clone ${grouparooDeployRepoUrl}`); // TODO - possibly change to execSync
+  execSync(`git clone ${grouparooDeployRepoUrl}`); // TODO - possibly change to execSync
 
   let mode;
   if (grouparooDirectory === 'deploy-config-grouparoo') {
