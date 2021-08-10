@@ -1,5 +1,6 @@
 const { execSync } = require("child_process");
 const inquirer = require('inquirer');
+const chalk = require('chalk');
 const log = require('../utils/logger.js').logger
 
 const teardown = () => {
@@ -29,13 +30,10 @@ const teardown = () => {
 }
 
 module.exports = async () => {
+  console.log(`${chalk.bold.cyan('WARNING: This will permanently delete all of your Tapestry AWS resources!')}`);
+
   const confirmTeardown = [
-    {
-      type: 'confirm',
-      name: 'confirmation',
-      message: 'WARNING: This will permanently delete all of your Tapestry AWS resources.\n' +
-               'Are you sure you would like to continue?',
-    },
+    { type: 'confirm', name: 'confirmation', message: 'Are you sure you would like to continue?', },
   ];
 
   await inquirer

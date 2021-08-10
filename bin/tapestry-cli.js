@@ -18,31 +18,31 @@ program
 program
   .command('kickstart')
   .alias('k')
-  .description('Sets up third-party SaaS services in pipeline for immediate use')
+  .description('sets up third-party SaaS services in pipeline for immediate use')
   .action(kickstart)
 
 program
   .command('init')
   .alias('i')
-  .description('Gather preliminary information and create file structure')
+  .description('gather preliminary information and create file structure')
   .action(init)
 
 program
   .command('teardown')
   .alias('t')
-  .description('Tear down all AWS resources associated with project')
+  .description('tear down all AWS resources associated with project')
   .action(teardown)
 
 program
   .command("rebuild")
   .alias("r")
-  .description("Rebuild grouparoo image and push it to AWS Elastic Container Repository")
+  .description("rebuild grouparoo image and push it to AWS Elastic Container Repository")
   .action(rebuild)
 
 program
   .command("start-server")
   .alias("st")
-  .description("Launch server for Tapestry UI")
+  .description("launch server for Tapestry UI")
   .action(startServer)
 
 program.parse(process.argv);
