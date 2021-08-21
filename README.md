@@ -28,10 +28,10 @@ Tapestry is an open source orchestration framework for the deployment of user en
 - [Installing Tapestry](https://github.com/tapestry-pipeline/tapestry-cli#installing-tapestry)
 - [Initialization](https://github.com/tapestry-pipeline/tapestry-cli#initialization)
 - [Deploying a Tapestry Pipeline](https://github.com/tapestry-pipeline/tapestry-cli#deploying-a-tapestry-pipeline)
-- [Management & Maintenance](https://github.com/tapestry-pipeline/tapestry-cli#management-&-maintenance)
+- [Management & Maintenance](https://github.com/tapestry-pipeline/tapestry-cli#management--maintenance)
 - [Metrics](https://github.com/tapestry-pipeline/tapestry-cli#metrics)
 - [Teardown](https://github.com/tapestry-pipeline/tapestry-cli#teardown)
-- [Architecture](https://github.com/tapestry-pipeline/tapestry-cli#architecture)
+- [Architecture](https://github.com/tapestry-pipeline/tapestry-cli#tapestry-architecture)
 - [Helpful Resources](https://github.com/tapestry-pipeline/tapestry-cli#helpful-resources)
 
 ---
