@@ -25,7 +25,7 @@ const provisionFolders = async () => {
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
   execSync(`mkdir ${projectName}`);
   process.chdir(`${projectName}`);
-  exec(`git clone ${airbyteRepo}`); // TODO - execSync solution for this?\
+  exec(`git clone ${airbyteRepo}`);
   log("New folders provisioned!");
   console.log(`${chalk.bold.cyan(`Now please change to your Tapestry project's root folder, called ${projectName}!`)}`);
 }

@@ -8,5 +8,3 @@ const getInstanceId = (keyPairName) => {
 module.exports = {
   getInstanceId
 }
-
-// aws ec2 describe-instance-status --instance-id i-0b1abf75ad0389ca3

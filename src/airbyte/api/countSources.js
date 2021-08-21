@@ -13,8 +13,6 @@ async function countSources(domainName, workspaceId)  {
     });
 }
 
-
-// export default countSources;
 module.exports = {
   countSources
 }

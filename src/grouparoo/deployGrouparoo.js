@@ -1,5 +1,5 @@
 const { connectToECR } = require("../aws/connectToECR.js");
-const { execSync, exec } = require('child_process');
+const { execSync } = require('child_process');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
 const { storeGrouparooPublicDNS } = require("../aws/storePublicDNS.js");
@@ -14,7 +14,7 @@ const validateInput = async (input) => {
 
 const deployGrouparoo = async (randomString, grouparooDeployRepoUrl, grouparooDirectory) => {
   console.log(`${chalk.bold.cyan("Now Grouparoo setup will begin...")}`);
-  execSync(`git clone ${grouparooDeployRepoUrl}`); // TODO - possibly change to execSync
+  execSync(`git clone ${grouparooDeployRepoUrl}`);
 
   let mode;
   if (grouparooDirectory === 'deploy-config-grouparoo') {
@@ -37,14 +37,10 @@ const deployGrouparoo = async (randomString, grouparooDeployRepoUrl, grouparooDi
   const groupPublicDNS = JSON.parse(execSync(`aws ssm get-parameter --name "/grouparoo/public-dns"`).toString()).Parameter.Value;
   await launchPublicDNS(groupPublicDNS);
 
+  console.log(`${chalk.bold.cyan('Please refer to the browser and sign in to your Grouparoo application by creating a team. Then locate your "tapestry" API key (found under "Platforms").')}`);
+
   const getGroupApiKey = [
-    {
-      type: 'input',
-      name: 'apiKey',
-      message: 'Please sign in to your Grouparoo application by creating a team.\n' +
-               'Then locate your "tapestry" API key (found under "Platforms") and enter it here:',
-      validate: validateInput,
-    }
+    { type: 'input', name: 'apiKey', message: 'Please enter your API key here:', validate: validateInput },
   ];
 
   await inquirer

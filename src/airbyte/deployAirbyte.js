@@ -9,7 +9,6 @@ const { storeAirbytePublicDNS } = require("../aws/storePublicDNS.js");
 const { setupSnowflakeDestination } = require("./setupConnections/setupSnowflakeDestination.js");
 const log = require('../utils/logger.js').logger;
 
-
 const deployAirbyte = async (projectName, randomString) => {
   await createAirbyteWarehouse();
 

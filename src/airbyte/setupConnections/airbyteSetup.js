@@ -24,7 +24,7 @@ async function setupAirbyteSources(domainName, sourceConfigList, destinationId, 
     const sourceId = await createSource(domainName, source);
     const sourceStatus = await checkSourceConnection(domainName, sourceId);
     if (sourceStatus !== 'succeeded') {
-      console.log('error, check source config');
+      console.log("error, check source config");
       return;
     }
 

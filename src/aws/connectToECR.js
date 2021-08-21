@@ -12,22 +12,18 @@ const connectToECR = (randomString) => {
 
   log('Connecting to ECR...');
 
-  // LOGIN
+  // login
   execSync(`aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin "${accountId}.dkr.ecr.${region}.amazonaws.com"`);
-
-  // aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin "392072328816.dkr.ecr.us-east-2.amazonaws.com"
 
   // switch context to run build command
   execSync(`docker context use default`);
-  // BUILD
+
+  // build
   log("Building local Grouparoo image... (this will take approximately 3 min)");
   execSync(`docker build -t grouparoo ./grouparoo-config &> .buildLogs`);
   log("Local image build complete!");
-
-  // $ command &> /dev/null
   
-  
-  // CREATE REPO
+  // create repo
   execSync(
     `aws ecr create-repository \
     --repository-name grouparoo \
@@ -35,10 +31,10 @@ const connectToECR = (randomString) => {
     --region ${region}`
   );
 
-  // TAG
+  // tag
   execSync(`docker tag grouparoo:latest ${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`);
 
-  // PUSH
+  // push
   log("Pushing Grouparoo image to ECR... (this will take approximately 4 min)");
   const imageUrl = `${accountId}.dkr.ecr.${region}.amazonaws.com/grouparoo:latest`;
   execSync(`docker push ${imageUrl}`);
@@ -47,6 +43,7 @@ const connectToECR = (randomString) => {
   console.log(`${chalk.bold.cyan(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter":`)}`);
 
   const contextName = `tapestry-ecs-${randomString}`;
+  execSync(`aws ssm put-parameter --name "/docker/ecs-context-name" --value "${contextName}" --type String --overwrite`);
   execSync(`docker context create ecs ${contextName}`, { stdio: "inherit" });
   execSync(`docker context use ${contextName}`);
 
@@ -61,8 +58,8 @@ const connectToECR = (randomString) => {
   execSync(`docker compose up &> .ecsLogs`);
   log("Grouparoo image deployed on ECS!");
 
-  const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
-  execSync(`aws ssm put-parameter --name "/grouparoo/stack-name" --value "${projectName}" --type String --overwrite`);
+  const grouparooStackName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
+  execSync(`aws ssm put-parameter --name "/grouparoo/stack-name" --value "${grouparooStackName}" --type String --overwrite`);
 };
 
 module.exports = {

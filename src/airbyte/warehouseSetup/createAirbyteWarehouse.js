@@ -12,9 +12,8 @@ async function createAirbyteWarehouse() {
   const password = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/acct-pass" --with-decryption').toString()).Parameter.Value;
  
   log('Setting up Airbyte Warehouse in Snowflake...');
-  // const snowflake = new Snowflake({ account, username, password }, { logSql: console.log });
-  const snowflake = new Snowflake({ account, username, password });
 
+  const snowflake = new Snowflake({ account, username, password });
   await snowflake.connect();
 
   const abUserPassword = JSON.parse(execSync('aws ssm get-parameter --name "/snowflake/ab-user-pass" --with-decryption').toString()).Parameter.Value;

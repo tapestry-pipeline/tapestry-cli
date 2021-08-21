@@ -1,8 +1,5 @@
 const chalk = require('chalk'); 
-// console.log(chalk.hex('#9579fd') // purple
-// console.log(chalk.hex('#29abe2') // teal
-// console.log(chalk.hex('#29abe2')(text))
-// log(chalk.blue('Hello') + ' World' + chalk.red('!'));
+
 function tapestryAscii() {
   console.log(chalk.hex('#9579fd')(`,,,,,,,, `) + chalk.hex('#29abe2')(`   ,╓╓╓╓╓╓╓╓`));
   console.log(chalk.hex('#9579fd')(`▒        ,\`=,`));
@@ -20,5 +17,4 @@ function tapestryAscii() {
   console.log(chalk.hex('#9579fd') (`              `) + chalk.hex('#29abe2')(`              \`                                      \``));
 }
 
-// export default tapestryAscii();
 module.exports = tapestryAscii;

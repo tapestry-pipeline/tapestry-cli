@@ -9,7 +9,7 @@ const log = require('../../utils/logger.js').logger;
 const chalk = require('chalk');
 
 const setupSnowflakeDestination = async (keyPairName, publicDNS, randomString) => {
-  console.log(`${chalk.bold.cyan('Please enter your email in the browser and click "continue" to create your workspace. Be sure to "Skip Onboarding"')}`);
+  console.log(`${chalk.bold.cyan('Please refer to the browser and sign up/sign in to your Airbyte account. Be sure to choose your "default" workspace.')}`);
 
   const loginConfirmation = [
     { type: 'confirm', name: 'confirmAbLogin', message: 'Please confirm here when you are ready.' },

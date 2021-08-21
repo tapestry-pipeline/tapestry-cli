@@ -1,19 +1,9 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
-const { execSync } = require("child_process");
 
 const yamlWriter = (imageUrl) => {
-  // const secretId = execSync(`aws secretsmanager get-secret-value --secret-id snowflake/acct-hostname`);
-  // const arn = execSync(`aws secretsmanager get-secret-value --secret-id snowflake/acct-hostname`);
-
   const data = {
     version: '3.1',
-    // secrets: {
-    //   'snow-host': {
-    //     name: 'arn:aws:secretsmanager:us-east-2:392072328816:secret:snowflake/acct-hostname-8u5GGK',
-    //     external: true
-    //   }
-    // },
     services: {
       redis: {
         'container_name': 'grouparoo_redis',
@@ -66,9 +56,6 @@ const yamlWriter = (imageUrl) => {
           'grouparoo_frontend',
           'grouparoo_backend'
         ],
-        // secrets: [
-        //   'snow-host'
-        // ],
       },
       'grouparoo-worker': {
         'image': `${imageUrl}`,
@@ -92,12 +79,6 @@ const yamlWriter = (imageUrl) => {
         'env_file': [
           '.env'
         ],
-        // secrets: [
-        //   'snow-host'
-        // ],
-        // environment: [
-        //   'SNOW_HOSTNAME=/run/secrets/snow-host'
-        // ]
       },
     },
     'networks': {

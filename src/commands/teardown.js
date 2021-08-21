@@ -30,7 +30,7 @@ const teardown = () => {
 }
 
 module.exports = async () => {
-  console.log(`${chalk.bold.cyan('WARNING: This will permanently delete all of your Tapestry AWS resources!')}`);
+  console.log(`${chalk.bold.cyan('WARNING: This will permanently delete the majority of your Tapestry AWS resources!')}`);
 
   const confirmTeardown = [
     { type: 'confirm', name: 'confirmation', message: 'Are you sure you would like to continue?', },
