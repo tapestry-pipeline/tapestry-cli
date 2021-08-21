@@ -24,15 +24,15 @@ Tapestry is an open source orchestration framework for the deployment of user en
 
 ## Table of Contents
 
-- [Prerequisites](https://github.com/tapestry-pipeline/tapestry-cli/blob/main/README.md#prerequisites)
-- [Installing Tapestry](https://github.com/tapestry-pipeline/tapestry-cli/blob/main/README.md#installing-tapestry)
-- [Initialization](https://github.com/tapestry-pipeline/tapestry-cli/blob/main/README.md#initialization)
-- [Deploying a Tapestry Pipeline](https://github.com/tapestry-pipeline/tapestry-cli/blob/main/README.md#deploying-a-tapestry-pipeline)
-- [Management & Maintenance](https://github.com/tapestry-pipeline/tapestry-cli/blob/main/README.md#management-&-maintenance)
-- [Metrics](https://github.com/tapestry-pipeline/tapestry-cli/blob/main/README.md#metrics)
-- [Teardown](https://github.com/tapestry-pipeline/tapestry-cli/blob/main/README.md#teardown)
-- [Architecture](https://github.com/tapestry-pipeline/tapestry-cli/blob/main/README.md#architecture)
-- [Helpful Resources](https://github.com/tapestry-pipeline/tapestry-cli/blob/main/README.md#helpful-resources)
+- [Prerequisites](https://github.com/tapestry-pipeline/tapestry-cli#prerequisites)
+- [Installing Tapestry](https://github.com/tapestry-pipeline/tapestry-cli#installing-tapestry)
+- [Initialization](https://github.com/tapestry-pipeline/tapestry-cli#initialization)
+- [Deploying a Tapestry Pipeline](https://github.com/tapestry-pipeline/tapestry-cli#deploying-a-tapestry-pipeline)
+- [Management & Maintenance](https://github.com/tapestry-pipeline/tapestry-cli#management-&-maintenance)
+- [Metrics](https://github.com/tapestry-pipeline/tapestry-cli#metrics)
+- [Teardown](https://github.com/tapestry-pipeline/tapestry-cli#teardown)
+- [Architecture](https://github.com/tapestry-pipeline/tapestry-cli#architecture)
+- [Helpful Resources](https://github.com/tapestry-pipeline/tapestry-cli#helpful-resources)
 
 ---
 
