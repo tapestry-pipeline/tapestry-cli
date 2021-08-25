@@ -1,6 +1,6 @@
 {
   "name": "tapestry-pipeline",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A command line application for deploying a user data pipeline with a reverse-ETL component on AWS.",
   "bin": {
     "tapestry": "./bin/tapestry-cli.js",
