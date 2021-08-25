@@ -3,21 +3,17 @@ const inquirer = require('inquirer');
 const { getRegion } = require("../aws/getRegion.js");
 const { getAccountId } = require("../aws/getAccountId.js");
 const { yamlWriter } = require("../utils/yamlWriter.js");
+const { envWriter } = require("../utils/envWriter.js");
 const chalk = require('chalk');
-
-// const launchConfig = () => {
-//   exec('cd grouparoo-config && grouparoo config');
-// }
-
-// const terminateConfig = () => {
-//   execSync('kill $(lsof -t -i:3000)');
-// }
+const log = require('../utils/logger.js').logger;
 
 const confirmationQuestion = [
   { type: 'confirm', name: 'confirmation', message: `Please confirm here when you are ready.` }
 ];
 
 const runRebuild = () => {
+  log('Rebuild process initiated!');
+
   const region = getRegion();
   const accountId = getAccountId();
 
@@ -43,10 +39,7 @@ const runRebuild = () => {
   execSync(`docker push ${imageUrl}`);
   log("Grouparoo image pushed!");
 
-  console.log(`${chalk.bold.cyan(`Please select an "Existing AWS Profile" from the following menu, and hit enter. Then select the "default" AWS Profile and hit enter":`)}`);
-
   const contextName = JSON.parse(execSync('aws ssm get-parameter --name "/docker/ecs-context-name"').toString()).Parameter.Value;
-  execSync(`docker context create ecs ${contextName}`, { stdio: "inherit" });
   execSync(`docker context use ${contextName}`);
 
   // writes docker-compose.yml for immediate use
@@ -58,22 +51,16 @@ const runRebuild = () => {
 
   log('Redeploying Grouparoo image on ECS... (this will take approximately 5-10 min)');
   execSync(`docker compose up &> .ecsLogs`);
-  log("Grouparoo image redeployed on ECS!");
   
   const grouparooStackName = JSON.parse(execSync('aws ssm get-parameter --name "/grouparoo/stack-name"').toString()).Parameter.Value;
   execSync(`aws cloudformation wait stack-update-complete --stack-name "${grouparooStackName}"`);
+
+  log("Grouparoo image redeployed on ECS!");
 }
 
 const reconfigure = async () => {
-  // const configConfirmation = [
-  //   {
-  //     type: 'confirm',
-  //     name: 'confirmConfig',
-  //     message: 'Please take a few moments to make your desired configuration changes.\n confirm here when you are ready.'
-  //     },
-  // ];
-
-  console.log(`${chalk.bold.cyan('Please take a few moments to make your desired configuration changes.')}`);
+  console.log(`${chalk.bold.cyan('Please take a few moments to make your desired configuration changes.\n' +
+                                 '(You can find more info about how to do this here: https://www.grouparoo.com/docs/config)')}`);
 
   await inquirer
     .prompt(confirmationQuestion)
@@ -87,30 +74,19 @@ const reconfigure = async () => {
 
 const rebuild = async () => {
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
-  console.log(`${chalk.bold.cyan(`Be sure you are running this command from your Tapestry project's root folder, called ${projectName}.`)}`);
-  // const pathConfirmation = [
-  //   {
-  //     type: 'confirm',
-  //     name: 'confirmPath',
-  //     message: `Be sure you are running this command from your Tapestry project's root folder, called ${projectName} for deployment to begin. Confirm when you are ready.`
-  //   }
-  // ];
+  console.log(`${chalk.bold.cyan(`Be sure you are running this command from your Tapestry project's root folder called "${projectName}".`)}`);
 
   await inquirer
     .prompt(confirmationQuestion)
     .then(async ({ confirmation }) => {
       if (confirmation) {
-        // launchConfig();
-        console.log(`${chalk.bold.cyan('Rebuild process initiated!')}`);
         await reconfigure();
-        // terminateConfig();
+        log('Rebuild complete!');
       }
     })
     .catch(error => console.log(error));
 }
 
 module.exports = async () => {
-  console.log('rebuild process initiated...');
   await rebuild();
-  console.log('Rebuild complete!');
 }

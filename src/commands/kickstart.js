@@ -13,7 +13,7 @@ const grouparooDirectory = "grouparoo-config-kickstart";
 module.exports = async () => {
   const randomString = getRandomString();
   const projectName = JSON.parse(execSync('aws ssm get-parameter --name "/project-name"').toString()).Parameter.Value;
-  console.log(`${chalk.bold.cyan(`Go to your Tapestry project's root folder, called "${projectName}" for deployment to begin.`)}`);
+  console.log(`${chalk.bold.cyan(`Go to your Tapestry project's root folder called "${projectName}" for deployment to begin.`)}`);
 
   const confirmationQuestion = [
     { type: 'confirm', name: 'confirmation', message: `Please confirm here when you are ready.` }

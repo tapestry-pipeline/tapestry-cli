@@ -27,7 +27,7 @@ const provisionFolders = async () => {
   process.chdir(`${projectName}`);
   exec(`git clone ${airbyteRepo}`);
   log("New folders provisioned!");
-  console.log(`${chalk.bold.cyan(`Now please change to your Tapestry project's root folder, called ${projectName}!`)}`);
+  console.log(`${chalk.bold.cyan(`Now please change to your Tapestry project's root folder called "${projectName}"!`)}`);
 }
 
 module.exports = async () => {
